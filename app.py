@@ -9,7 +9,6 @@ def create_app():
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
-    # Mail config (won't break if unused yet)
     app.config["MAIL_SERVER"] = os.getenv("MAILJET_SMTP_SERVER")
     app.config["MAIL_PORT"] = int(os.getenv("MAILJET_SMTP_PORT"))
     app.config["MAIL_USE_TLS"] = True
