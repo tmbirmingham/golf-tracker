@@ -5,7 +5,8 @@ import os
 load_dotenv()
 
 def create_app():
-    app = Flask(__name__)
+    template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app", "templates")
+    app = Flask(__name__, template_folder=template_dir)
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 
@@ -16,7 +17,7 @@ def create_app():
     app.config["MAIL_PASSWORD"] = os.getenv("MAILJET_SMTP_PASSWORD")
     app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_FROM_EMAIL")
 
-    from app.routes import main
+    from app.routes.main import main
     app.register_blueprint(main)
 
     return app
