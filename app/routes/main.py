@@ -154,15 +154,22 @@ def finish():
                 error="Please enter your email address.",
             )
 
-        status, message = send_round_email(
-            "Golfer",
-            email,
-            scores_list,
-            gir_list,
-            fairway_list,
-            putts_list,
-            course_info,
-        )
+        try:
+            status, message = send_round_email(
+                "Golfer",
+                email,
+                scores_list,
+                gir_list,
+                fairway_list,
+                putts_list,
+                course_info,
+                played_holes,
+            )
+        except Exception as e:
+            import traceback
+            print(f"ERROR in finish route: {e}")
+            traceback.print_exc()
+            status, message = 500, str(e)
         session.clear()
 
         if status == 200:
@@ -172,6 +179,7 @@ def finish():
                 total_par=total_par,
                 to_par=to_par,
                 sent=True,
+                email=email,
             )
         return render_template(
             "finish.html",

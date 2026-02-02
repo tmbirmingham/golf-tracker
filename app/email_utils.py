@@ -10,6 +10,10 @@ def _build_insights(scores, putts_list, gir_list, fairway_list, course_info):
     if not course_info or not scores:
         return insights
 
+    num_holes = len(scores)
+    if num_holes == 0:
+        return insights
+
     holes = course_info.get("holes", {})
     total_par = course_info.get("total_par", 72)
     total_score = sum(scores)
@@ -45,7 +49,6 @@ def _build_insights(scores, putts_list, gir_list, fairway_list, course_info):
 
     # GIR
     if gir_list:
-        num_holes = len(scores)
         gir_count = sum(gir_list)
         pct = round(100 * gir_count / num_holes)
         if pct >= 50:
@@ -70,7 +73,6 @@ def _build_insights(scores, putts_list, gir_list, fairway_list, course_info):
 
     # Putts
     if putts_list:
-        num_holes = len(scores)
         total_putts = sum(putts_list)
         avg_putts = round(total_putts / num_holes, 1)
         three_putts = sum(1 for p in putts_list if p >= 3)
@@ -97,6 +99,7 @@ def send_round_email(
     fairway_list=None,
     putts_list=None,
     course_info=None,
+    played_holes=None,
 ):
     """
     Sends a summary of a golf round to the specified email, including putts and insights.
@@ -121,26 +124,27 @@ def send_round_email(
     body += "Hole-by-Hole Summary:\n"
     body += "-" * 50 + "\n"
 
-    for i, score in enumerate(scores, start=1):
-        hole_info = f"Hole {i}: {score}"
+    for idx, score in enumerate(scores):
+        hole_num = played_holes[idx] if played_holes else (idx + 1)
+        hole_info = f"Hole {hole_num}: {score}"
         if course_info:
-            par = course_info["holes"].get(i, 4)
+            par = course_info["holes"].get(hole_num, 4)
             hole_info += f" (Par {par})"
 
         # Add putts
-        if putts_list and i <= len(putts_list):
-            hole_info += f" Putts: {putts_list[i - 1]}"
+        if putts_list and idx < len(putts_list):
+            hole_info += f" Putts: {putts_list[idx]}"
 
         # Add GIR
-        if gir_list and i <= len(gir_list):
-            gir = "✓" if gir_list[i - 1] else "✗"
+        if gir_list and idx < len(gir_list):
+            gir = "✓" if gir_list[idx] else "✗"
             hole_info += f" GIR: {gir}"
 
         # Add fairway (only for par 4s and 5s)
-        if fairway_list and i <= len(fairway_list) and course_info:
-            par = course_info["holes"].get(i, 4)
+        if fairway_list and idx < len(fairway_list) and course_info:
+            par = course_info["holes"].get(hole_num, 4)
             if par != 3:
-                fairway = fairway_list[i - 1]
+                fairway = fairway_list[idx]
                 if fairway == "hit":
                     hole_info += " Fairway: ✓"
                 elif fairway == "left":
