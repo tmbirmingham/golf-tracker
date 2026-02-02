@@ -29,8 +29,8 @@ def hole(hole):
     if hole < 1 or hole > 18:
         return redirect(url_for("main.hole", hole=session["current_hole"]))
 
-    # Only allow entering score for the current hole (no skipping ahead)
-    if hole != session["current_hole"]:
+    # Only allow entering score for the current hole or previous holes (no skipping ahead)
+    if hole > session["current_hole"]:
         return redirect(url_for("main.hole", hole=session["current_hole"]))
 
     if request.method == "POST":
@@ -68,11 +68,18 @@ def hole(hole):
         if hole == 18:
             return redirect(url_for("main.finish"))
 
-        session["current_hole"] = hole + 1
+        if request.form.get("action") == "finish":
+            return redirect(url_for("main.finish"))
+
+        if request.form.get("action") == "back":
+            return redirect(url_for("main.hole", hole=max(1, hole - 1)))
+
+        session["current_hole"] = max(session.get("current_hole", 1), hole + 1)
         return redirect(url_for("main.hole", hole=hole + 1))
 
     par = get_hole_par(hole)
     is_par3 = is_par_3(hole)
+    current_score = session.get("scores", {}).get(str(hole))
     current_gir = session.get("gir", {}).get(str(hole), False)
     current_fairway = session.get("fairway", {}).get(str(hole))
     current_putts = session.get("putts", {}).get(str(hole), 0)
@@ -81,6 +88,7 @@ def hole(hole):
         "hole.html",
         hole=hole,
         par=par,
+        current_score=current_score,
         is_par3=is_par3,
         current_gir=current_gir,
         current_fairway=current_fairway,
@@ -90,20 +98,24 @@ def hole(hole):
 
 @main.route("/finish", methods=["GET", "POST"])
 def finish():
-    if "scores" not in session or len(session.get("scores", {})) != 18:
+    scores_dict = session.get("scores", {})
+    if not scores_dict:
         return redirect(url_for("main.start_round"))
 
-    scores_dict = session.get("scores", {})
-    scores_list = [scores_dict.get(str(i), 0) for i in range(1, 19)]
+    # Only include holes that have scores
+    played_holes = sorted([int(h) for h in scores_dict.keys()])
+    num_holes_played = len(played_holes)
+
+    scores_list = [scores_dict.get(str(i), 0) for i in played_holes]
     total = sum(scores_list)
 
     # Get stats
     gir_dict = session.get("gir", {})
-    gir_list = [gir_dict.get(str(i), False) for i in range(1, 19)]
+    gir_list = [gir_dict.get(str(i), False) for i in played_holes]
     fairway_dict = session.get("fairway", {})
-    fairway_list = [fairway_dict.get(str(i)) for i in range(1, 19)]
+    fairway_list = [fairway_dict.get(str(i)) for i in played_holes]
     putts_dict = session.get("putts", {})
-    putts_list = [putts_dict.get(str(i), 0) for i in range(1, 19)]
+    putts_list = [putts_dict.get(str(i), 0) for i in played_holes]
 
     # Calculate stats
     gir_count = sum(gir_list)
@@ -112,10 +124,11 @@ def finish():
     fairway_right = sum(1 for f in fairway_list if f == "right")
     fairway_total = fairway_hit + fairway_left + fairway_right
     total_putts = sum(putts_list)
-    putts_avg = round(total_putts / 18, 1) if putts_list else 0
+    putts_avg = round(total_putts / num_holes_played, 1) if num_holes_played > 0 else 0
 
     course_info = get_course_info()
-    total_par = course_info["total_par"]
+    # Calculate total par for only played holes
+    total_par = sum(course_info["holes"].get(h, 4) for h in played_holes)
     to_par = total - total_par
 
     if request.method == "POST":
