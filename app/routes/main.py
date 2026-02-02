@@ -169,7 +169,7 @@ def finish():
             import traceback
             current_app.logger.error(f"ERROR in finish route: {e}")
             current_app.logger.error(traceback.format_exc())
-            status, message = 500, str(e)
+            status, message = 500, "Unable to send email. Please check your connection or try again later."
 
         if status == 200:
             session.clear()
