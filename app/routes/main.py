@@ -170,10 +170,6 @@ def finish():
             current_app.logger.error(f"ERROR in finish route: {e}")
             current_app.logger.error(traceback.format_exc())
             status, message = 500, str(e)
-            print(f"ERROR in finish route: {e}")
-            traceback.print_exc()
-            status, message = 500, str(e)
-        session.clear()
 
         if status == 200:
             session.clear()
