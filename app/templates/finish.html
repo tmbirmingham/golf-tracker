@@ -10,7 +10,7 @@
   <h1>⛳ Round complete</h1>
 
   {% if sent %}
-    <p class="sent">Your round summary has been sent to your email.</p>
+    <p class="sent">Your round summary has been sent to <strong>{{ email }}</strong>.</p>
     <p class="total">Total score: <strong>{{ total }}</strong></p>
     {% if total_par %}
     <p class="to-par">
