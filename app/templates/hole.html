@@ -4,29 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hole {{ hole }} — Golf Tracker</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    .progress { color: #666; font-size: 0.9rem; margin-bottom: 1.5rem; }
-    .par { color: #0a7; font-weight: 600; margin-bottom: 1rem; }
-    label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
-    input[type="number"] { width: 100%; padding: 0.6rem; font-size: 1.2rem; margin-bottom: 1rem; }
-    
-    .stat-group { margin-bottom: 1.5rem; padding: 1rem; background: #f5f5f5; border-radius: 8px; }
-    .stat-group label { font-weight: normal; margin-bottom: 0.25rem; }
-    
-    .checkbox-group { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-    input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; }
-    
-    .button-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .button-group button { flex: 1; min-width: 80px; padding: 0.6rem; font-size: 0.9rem; cursor: pointer; border: 2px solid #ccc; background: #fff; color: #333; border-radius: 6px; }
-    .button-group button:hover { background: #f0f0f0; }
-    .button-group button.active { background: #0a7; color: #fff; border-color: #0a7; }
-    
-    .submit-btn { width: 100%; padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; background: #0a7; color: #fff; border: none; border-radius: 6px; margin-top: 1rem; }
-    .submit-btn:hover { background: #086; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
   <h1>Hole {{ hole }}</h1>
@@ -35,7 +13,7 @@
 
   <form method="POST" id="holeForm">
     <label for="score">Score</label>
-    <input type="number" id="score" name="score" min="1" max="20" value="{{ par }}" required autofocus>
+    <input type="number" id="score" name="score" min="1" max="20" value="{{ current_score or par }}" required autofocus>
 
     <label for="putts">Putts</label>
     <input type="number" id="putts" name="putts" min="0" max="10" value="{{ current_putts }}" required>
@@ -60,10 +38,19 @@
     </div>
     {% endif %}
 
-    <button type="submit" class="submit-btn">
+    <button type="submit" name="action" value="next" class="submit-btn">
       {% if hole == 18 %}Finish round{% else %}Next hole →{% endif %}
     </button>
   </form>
+
+  <div class="navigation">
+    {% if hole > 1 %}
+    <button type="submit" form="holeForm" name="action" value="back" class="btn nav-btn">← Back</button>
+    {% else %}
+    <div></div>
+    {% endif %}
+    <button type="submit" form="holeForm" name="action" value="finish" class="btn nav-btn end-btn">End Round</button>
+  </div>
 
   <script>
     // Handle fairway button clicks

@@ -10,15 +10,19 @@ def _build_insights(scores, putts_list, gir_list, fairway_list, course_info):
     if not course_info or not scores:
         return insights
 
+    num_holes = len(scores)
+    if num_holes == 0:
+        return insights
+
     holes = course_info.get("holes", {})
     total_par = course_info.get("total_par", 72)
     total_score = sum(scores)
 
     # Score vs par per hole
     scores_vs_par = []
-    for i in range(1, 19):
+    for i in range(1, len(scores) + 1):
         par = holes.get(i, 4)
-        score = scores[i - 1] if i <= len(scores) else 0
+        score = scores[i - 1]
         scores_vs_par.append((i, score - par))
 
     # Best and worst holes
@@ -30,26 +34,27 @@ def _build_insights(scores, putts_list, gir_list, fairway_list, course_info):
         insights.append(f"Toughest hole: #{worst[0]} (+{worst[1]} vs par)")
 
     # Front 9 vs Back 9
-    front = sum(scores[:9]) if len(scores) >= 9 else 0
-    back = sum(scores[9:18]) if len(scores) >= 18 else 0
-    front_par = sum(holes.get(i, 4) for i in range(1, 10))
-    back_par = sum(holes.get(i, 4) for i in range(10, 19))
-    front_vs_par = front - front_par
-    back_vs_par = back - back_par
-    if front_vs_par != back_vs_par:
-        if front_vs_par < back_vs_par:
-            insights.append(f"Stronger front 9 ({front_vs_par} vs {back_vs_par} on the back)")
-        else:
-            insights.append(f"Stronger back 9 ({back_vs_par} vs {front_vs_par} on the front)")
+    if len(scores) >= 18:
+        front = sum(scores[:9])
+        back = sum(scores[9:18])
+        front_par = sum(holes.get(i, 4) for i in range(1, 10))
+        back_par = sum(holes.get(i, 4) for i in range(10, 19))
+        front_vs_par = front - front_par
+        back_vs_par = back - back_par
+        if front_vs_par != back_vs_par:
+            if front_vs_par < back_vs_par:
+                insights.append(f"Stronger front 9 ({front_vs_par} vs {back_vs_par} on the back)")
+            else:
+                insights.append(f"Stronger back 9 ({back_vs_par} vs {front_vs_par} on the front)")
 
     # GIR
-    if gir_list and len(gir_list) == 18:
+    if gir_list:
         gir_count = sum(gir_list)
-        pct = round(100 * gir_count / 18)
+        pct = round(100 * gir_count / num_holes)
         if pct >= 50:
-            insights.append(f"Hit {gir_count}/18 greens ({pct}% GIR) — solid approach shots")
+            insights.append(f"Hit {gir_count}/{num_holes} greens ({pct}% GIR) — solid approach shots")
         elif gir_count > 0:
-            insights.append(f"Hit {gir_count}/18 greens ({pct}% GIR) — room to improve on approaches")
+            insights.append(f"Hit {gir_count}/{num_holes} greens ({pct}% GIR) — room to improve on approaches")
         else:
             insights.append("No greens in regulation — focus on approach accuracy")
 
@@ -67,9 +72,9 @@ def _build_insights(scores, putts_list, gir_list, fairway_list, course_info):
                 insights.append(f"Fairways: {fairway_hit}/{fairway_total} ({pct}%) — consider club or aim")
 
     # Putts
-    if putts_list and len(putts_list) == 18:
+    if putts_list:
         total_putts = sum(putts_list)
-        avg_putts = round(total_putts / 18, 1)
+        avg_putts = round(total_putts / num_holes, 1)
         three_putts = sum(1 for p in putts_list if p >= 3)
         insights.append(f"Total putts: {total_putts} ({avg_putts} per hole)")
         if three_putts > 0:
@@ -79,7 +84,7 @@ def _build_insights(scores, putts_list, gir_list, fairway_list, course_info):
     birdies = sum(1 for svp in scores_vs_par if svp[1] == -1)
     pars = sum(1 for svp in scores_vs_par if svp[1] == 0)
     bogeys = sum(1 for svp in scores_vs_par if svp[1] == 1)
-    others = 18 - birdies - pars - bogeys
+    others = len(scores) - birdies - pars - bogeys
     if birdies > 0:
         insights.append(f"Scorecard: {birdies} birdie(s), {pars} par(s), {bogeys} bogey(s)" + (f", {others} other(s)" if others else ""))
 
@@ -94,10 +99,14 @@ def send_round_email(
     fairway_list=None,
     putts_list=None,
     course_info=None,
+    played_holes=None,
 ):
     """
     Sends a summary of a golf round to the specified email, including putts and insights.
     """
+    if not scores:
+        return 400, "No scores recorded"
+
     total_score = sum(scores)
 
     # Build the email body
@@ -118,26 +127,27 @@ def send_round_email(
     body += "Hole-by-Hole Summary:\n"
     body += "-" * 50 + "\n"
 
-    for i, score in enumerate(scores, start=1):
-        hole_info = f"Hole {i}: {score}"
+    for idx, score in enumerate(scores):
+        hole_num = played_holes[idx] if played_holes else (idx + 1)
+        hole_info = f"Hole {hole_num}: {score}"
         if course_info:
-            par = course_info["holes"].get(i, 4)
+            par = course_info["holes"].get(hole_num, 4)
             hole_info += f" (Par {par})"
 
         # Add putts
-        if putts_list and i <= len(putts_list):
-            hole_info += f" Putts: {putts_list[i - 1]}"
+        if putts_list and idx < len(putts_list):
+            hole_info += f" Putts: {putts_list[idx]}"
 
         # Add GIR
-        if gir_list and i <= len(gir_list):
-            gir = "✓" if gir_list[i - 1] else "✗"
+        if gir_list and idx < len(gir_list):
+            gir = "✓" if gir_list[idx] else "✗"
             hole_info += f" GIR: {gir}"
 
         # Add fairway (only for par 4s and 5s)
-        if fairway_list and i <= len(fairway_list) and course_info:
-            par = course_info["holes"].get(i, 4)
+        if fairway_list and idx < len(fairway_list) and course_info:
+            par = course_info["holes"].get(hole_num, 4)
             if par != 3:
-                fairway = fairway_list[i - 1]
+                fairway = fairway_list[idx]
                 if fairway == "hit":
                     hole_info += " Fairway: ✓"
                 elif fairway == "left":
@@ -155,7 +165,7 @@ def send_round_email(
     # Stats summary
     if gir_list:
         gir_count = sum(gir_list)
-        body += f"Greens in Regulation: {gir_count}/18\n"
+        body += f"Greens in Regulation: {gir_count}/{len(scores)}\n"
 
     if fairway_list:
         fairway_hit = sum(1 for f in fairway_list if f == "hit")
@@ -165,9 +175,9 @@ def send_round_email(
         if fairway_total > 0:
             body += f"Fairways Hit: {fairway_hit}/{fairway_total} ({fairway_left} left, {fairway_right} right)\n"
 
-    if putts_list and len(putts_list) == 18:
+    if putts_list:
         total_putts = sum(putts_list)
-        body += f"Total Putts: {total_putts} ({round(total_putts / 18, 1)} per hole)\n"
+        body += f"Total Putts: {total_putts} ({round(total_putts / len(scores), 1)} per hole)\n"
 
     # Insights
     insights = _build_insights(scores, putts_list or [], gir_list or [], fairway_list or [], course_info)
