@@ -1,6 +1,9 @@
-import smtplib
-from email.mime.text import MIMEText
+import requests
 from flask import current_app
+
+# Mailjet Send API v3.1 (HTTPS) - works on Render where SMTP is often blocked
+MAILJET_SEND_URL = "https://api.mailjet.com/v3.1/send"
+REQUEST_TIMEOUT = 15
 
 
 def _build_insights(holes_played, scores, putts_list, gir_list, fairway_list, course_info):
@@ -202,35 +205,60 @@ def send_round_email(
 
     body += "\nThanks for using Golf Tracker!"
 
-    msg = MIMEText(body)
     subject = f"{player_name}'s Golf Round Summary"
     if num_holes != 18:
         subject += f" ({num_holes} holes)"
-    msg["Subject"] = subject
-    msg["From"] = current_app.config["MAIL_DEFAULT_SENDER"]
-    msg["To"] = to_email
+    from_email = current_app.config["MAIL_DEFAULT_SENDER"]
 
-    try:
-        with smtplib.SMTP(current_app.config["MAIL_SERVER"], current_app.config["MAIL_PORT"]) as server:
-            server.starttls()
-            server.login(current_app.config["MAIL_USERNAME"], current_app.config["MAIL_PASSWORD"])
-            server.sendmail(msg["From"], [to_email], msg.as_string())
-        return 200, "Email sent successfully"
-    except Exception as e:
-        return 500, str(e)
+    return _mailjet_send(from_email, to_email, subject, body)
 
 
 def send_test_email(to_email):
-    """Send a simple test email to verify SMTP config."""
+    """Send a simple test email via Mailjet API."""
+    from_email = current_app.config["MAIL_DEFAULT_SENDER"]
+    subject = "Golf Tracker test"
+    body = "Golf Tracker test email – config is working."
+    return _mailjet_send(from_email, to_email, subject, body)
+
+
+def _mailjet_send(from_email, to_email, subject, text_body):
+    """
+    Send an email via Mailjet Send API v3.1 (HTTPS).
+    Uses same credentials as SMTP: MAIL_USERNAME = API Key, MAIL_PASSWORD = Secret Key.
+    """
+    api_key = current_app.config.get("MAIL_USERNAME")
+    api_secret = current_app.config.get("MAIL_PASSWORD")
+    if not api_key or not api_secret:
+        return 500, "Mailjet API key or secret not configured (set MAILJET_SMTP_USERNAME and MAILJET_SMTP_PASSWORD)."
+
+    payload = {
+        "Messages": [
+            {
+                "From": {"Email": from_email, "Name": "Golf Tracker"},
+                "To": [{"Email": to_email}],
+                "Subject": subject,
+                "TextPart": text_body,
+            }
+        ]
+    }
+
     try:
-        with smtplib.SMTP(current_app.config["MAIL_SERVER"], current_app.config["MAIL_PORT"]) as server:
-            server.starttls()
-            server.login(current_app.config["MAIL_USERNAME"], current_app.config["MAIL_PASSWORD"])
-            msg = MIMEText("Golf Tracker test email – config is working.")
-            msg["Subject"] = "Golf Tracker test"
-            msg["From"] = current_app.config["MAIL_DEFAULT_SENDER"]
-            msg["To"] = to_email
-            server.sendmail(msg["From"], [to_email], msg.as_string())
-        return 200, "Test email sent"
-    except Exception as e:
+        r = requests.post(
+            MAILJET_SEND_URL,
+            auth=(api_key, api_secret),
+            json=payload,
+            timeout=REQUEST_TIMEOUT,
+        )
+        if r.status_code == 200:
+            return 200, "Email sent successfully"
+        # Mailjet returns 4xx/5xx with error details in JSON
+        try:
+            err_data = r.json()
+            err_msg = err_data.get("ErrorMessage") or str(err_data)
+        except Exception:
+            err_msg = r.text or f"HTTP {r.status_code}"
+        return r.status_code, err_msg
+    except requests.exceptions.Timeout:
+        return 500, "Email server request timed out. Please try again."
+    except requests.exceptions.RequestException as e:
         return 500, str(e)
