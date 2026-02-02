@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your round — Golf Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <h1>⛳ Your round</h1>
+  {% if course_info %}
+  <p class="course-name">{{ course_info.name }}</p>
+  {% endif %}
+
+  <p class="hint">Tap a hole to enter or edit its score and stats.</p>
+
+  <div class="scorecard">
+    {% for hole_num, score, par in scorecard %}
+    <a href="{{ url_for('main.hole', hole=hole_num) }}" class="{% if score is not none %}filled{% endif %}">
+      <span class="hole">Hole {{ hole_num }} (Par {{ par }})</span>
+      <span class="score">{% if score is not none %}{{ score }}{% else %}—{% endif %}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if holes_played_count > 0 %}
+  <a href="{{ url_for('main.finish') }}" class="end-round">End round ({{ holes_played_count }} hole{{ 's' if holes_played_count != 1 else '' }})</a>
+  {% else %}
+  <span class="end-round disabled">End round — enter at least one hole</span>
+  {% endif %}
+</body>
+</html>

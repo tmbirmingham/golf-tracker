@@ -4,38 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Round complete — Golf Tracker</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; max-width: 500px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
-    h2 { font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #0a7; }
-    .course-name { color: #666; font-size: 0.9rem; margin-bottom: 0.5rem; }
-    .total { font-size: 1.5rem; font-weight: 600; margin: 1rem 0; }
-    .to-par { font-size: 1.1rem; color: #0a7; margin-bottom: 1rem; }
-    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0; }
-    .stat-box { padding: 0.75rem; background: #f5f5f5; border-radius: 6px; text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 600; color: #0a7; }
-    .stat-label { font-size: 0.85rem; color: #666; margin-top: 0.25rem; }
-    .scores { display: grid; grid-template-columns: repeat(9, 1fr); gap: 2px; margin: 1rem 0; font-size: 0.85rem; }
-    .scores span { padding: 0.25rem; text-align: center; background: #f0f0f0; border-radius: 4px; }
-    .scores .label { background: #e0e0e0; font-weight: 600; }
-    .error { color: #c00; margin-bottom: 0.5rem; }
-    label { display: block; margin-bottom: 0.25rem; font-weight: 600; }
-    input[type="email"] { width: 100%; padding: 0.6rem; font-size: 1rem; margin-bottom: 1rem; }
-    button { padding: 0.6rem 1.2rem; font-size: 1rem; cursor: pointer; background: #0a7; color: #fff; border: none; border-radius: 6px; }
-    button:hover { background: #086; }
-    .sent { color: #0a7; font-weight: 600; margin-top: 1rem; padding: 1rem; background: #e8f5e9; border-radius: 6px; }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
+<body class="finish-page">
   <h1>⛳ Round complete</h1>
 
   {% if sent %}
     <p class="sent">Your round summary has been sent to your email.</p>
     <p class="total">Total score: <strong>{{ total }}</strong></p>
+    {% if num_holes %}<p class="holes-count">{{ num_holes }} hole{{ 's' if num_holes != 1 else '' }}</p>{% endif %}
     {% if total_par %}
     <p class="to-par">
-      {% if to_par > 0 %}+{{ to_par }}{% elif to_par < 0 %}{{ to_par }}{% else %}Even{% endif %} 
+      {% if to_par > 0 %}+{{ to_par }}{% elif to_par < 0 %}{{ to_par }}{% else %}Even{% endif %}
       (Par {{ total_par }})
     </p>
     {% endif %}
@@ -43,19 +23,22 @@
     {% if course_info %}
     <p class="course-name">{{ course_info.name }}</p>
     {% endif %}
-    
+    {% if num_holes %}
+    <p class="holes-count">Summary for {{ num_holes }} hole{{ 's' if num_holes != 1 else '' }}</p>
+    {% endif %}
+
     <p class="total">Total score: {{ total }}</p>
     {% if total_par %}
     <p class="to-par">
-      {% if to_par > 0 %}+{{ to_par }}{% elif to_par < 0 %}{{ to_par }}{% else %}Even{% endif %} 
+      {% if to_par > 0 %}+{{ to_par }}{% elif to_par < 0 %}{{ to_par }}{% else %}Even{% endif %}
       (Par {{ total_par }})
     </p>
     {% endif %}
 
-    {% if scores_list %}
+    {% if holes_played and scores_list %}
     <h2>Scorecard</h2>
     <div class="scores">
-      {% for i in range(1, 19) %}<span class="label">{{ i }}</span>{% endfor %}
+      {% for h in holes_played %}<span class="label">{{ h }}</span>{% endfor %}
       {% for s in scores_list %}<span>{{ s }}</span>{% endfor %}
     </div>
     {% endif %}

@@ -1,0 +1,355 @@
+/* Base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 520px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #0a7;
+}
+
+/* Start page */
+body.start-page {
+  max-width: 420px;
+}
+
+body.start-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.course-name {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #0a7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+}
+
+button:hover {
+  background: #086;
+}
+
+/* Round dashboard */
+.hint {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.scorecard {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.scorecard a {
+  display: block;
+  padding: 0.6rem;
+  text-align: center;
+  background: #f0f0f0;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.scorecard a:hover {
+  background: #e0e0e0;
+}
+
+.scorecard a.filled {
+  background: #d4edda;
+  color: #155724;
+}
+
+.scorecard a .hole {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.scorecard a .score {
+  font-size: 1.1rem;
+}
+
+.end-round {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #0a7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 1rem;
+}
+
+.end-round:hover {
+  background: #086;
+}
+
+.end-round.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Hole page */
+body.hole-page {
+  max-width: 420px;
+}
+
+.par {
+  color: #0a7;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.nav a {
+  color: #0a7;
+  text-decoration: none;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #0a7;
+  border-radius: 6px;
+}
+
+.nav a:hover {
+  background: #0a7;
+  color: #fff;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+input[type="number"],
+input[type="email"] {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+input[type="number"] {
+  font-size: 1.2rem;
+}
+
+.stat-group {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.stat-group label {
+  font-weight: normal;
+  margin-bottom: 0.25rem;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.checkbox-group label {
+  margin: 0;
+}
+
+input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.button-group button {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.6rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 2px solid #ccc;
+  background: #fff;
+  color: #333;
+  border-radius: 6px;
+}
+
+.button-group button:hover {
+  background: #f0f0f0;
+}
+
+.button-group button.active {
+  background: #0a7;
+  color: #fff;
+  border-color: #0a7;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #0a7;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover {
+  background: #086;
+}
+
+.submit-btn.secondary {
+  background: #666;
+  margin-top: 0.25rem;
+}
+
+.submit-btn.secondary:hover {
+  background: #555;
+}
+
+.end-link {
+  display: block;
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.end-link a {
+  color: #0a7;
+  text-decoration: none;
+}
+
+.end-link a:hover {
+  text-decoration: underline;
+}
+
+/* Finish page */
+body.finish-page {
+  max-width: 500px;
+}
+
+body.finish-page h1 {
+  margin-bottom: 1rem;
+}
+
+.holes-count {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.total {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1rem 0;
+}
+
+.to-par {
+  font-size: 1.1rem;
+  color: #0a7;
+  margin-bottom: 1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.stat-box {
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0a7;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.scores {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
+  gap: 2px;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+}
+
+.scores span {
+  padding: 0.25rem;
+  text-align: center;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.scores .label {
+  background: #e0e0e0;
+  font-weight: 600;
+}
+
+.error {
+  color: #c00;
+  margin-bottom: 0.5rem;
+}
+
+.sent {
+  color: #0a7;
+  font-weight: 600;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #e8f5e9;
+  border-radius: 6px;
+}
