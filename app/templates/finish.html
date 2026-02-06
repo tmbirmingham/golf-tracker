@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body class="finish-page">
-  <h1>⛳ Round complete</h1>
+  <h1>Round complete</h1>
 
   {% if sent %}
-    <p class="sent">Your round summary has been sent to your email.</p>
+    <p class="sent">Your round summary has been sent to {{ to_email }}.</p>
     <p class="total">Total score: <strong>{{ total }}</strong></p>
     {% if num_holes %}<p class="holes-count">{{ num_holes }} hole{{ 's' if num_holes != 1 else '' }}</p>{% endif %}
     {% if total_par %}

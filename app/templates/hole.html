@@ -12,9 +12,6 @@
 
   <div class="nav">
     <a href="{{ url_for('main.round_dashboard') }}">← Back to round</a>
-    {% if hole > 1 %}<a href="{{ url_for('main.hole', hole=hole - 1) }}">← Prev</a>{% endif %}
-    {% if hole < 18 %}<a href="{{ url_for('main.hole', hole=hole + 1) }}">Next →</a>{% endif %}
-    <a href="{{ url_for('main.finish') }}">End round</a>
   </div>
 
   <form method="POST" id="holeForm">
@@ -44,10 +41,10 @@
     </div>
     {% endif %}
 
-    <button type="submit" class="submit-btn" name="action" value="save">Save</button>
     {% if hole < 18 %}
     <button type="submit" class="submit-btn secondary" name="action" value="save_and_next">Save & next hole →</button>
     {% endif %}
+    <button type="submit" class="submit-btn" name="action" value="save">Save</button>
   </form>
 
   <p class="end-link"><a href="{{ url_for('main.finish') }}">End round</a></p>
