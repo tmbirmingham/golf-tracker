@@ -9,8 +9,9 @@
 <body class="finish-page">
   <h1>Round complete</h1>
 
-  {% if sent %}
-    <p class="sent">Your round summary has been sent to {{ to_email }}.</p>
+  {% if sent or saved %}
+    {% if sent %}<p class="sent">Your round summary has been sent to {{ to_email }}.</p>{% endif %}
+    <p class="sent">Round saved. <a href="{{ url_for('main.rounds_history') }}">View saved rounds</a></p>
     <p class="total">Total score: <strong>{{ total }}</strong></p>
     {% if num_holes %}<p class="holes-count">{{ num_holes }} hole{{ 's' if num_holes != 1 else '' }}</p>{% endif %}
     {% if total_par %}
@@ -20,9 +21,7 @@
     </p>
     {% endif %}
   {% else %}
-    {% if course_info %}
-    <p class="course-name">{{ course_info.name }}</p>
-    {% endif %}
+    {% include "_course_header.html" %}
     {% if num_holes %}
     <p class="holes-count">Summary for {{ num_holes }} hole{{ 's' if num_holes != 1 else '' }}</p>
     {% endif %}
@@ -37,9 +36,13 @@
 
     {% if holes_played and scores_list %}
     <h2>Scorecard</h2>
-    <div class="scores">
-      {% for h in holes_played %}<span class="label">{{ h }}</span>{% endfor %}
-      {% for s in scores_list %}<span>{{ s }}</span>{% endfor %}
+    <div class="scores" style="grid-template-columns: repeat({{ holes_played|length + 1 }}, minmax(2.25rem, 1fr));">
+      <span class="label">Hole</span>{% for h in holes_played %}<span class="label">{{ h }}</span>{% endfor %}
+      {% if yardages_list and yardages_list|select|list|length == yardages_list|length %}
+      <span class="label">Yds</span>{% for y in yardages_list %}<span class="yardage">{{ y }}</span>{% endfor %}
+      {% endif %}
+      <span class="label">Par</span>{% for p in pars_list %}<span class="par-cell">{{ p }}</span>{% endfor %}
+      <span class="label">Score</span>{% for s in scores_list %}<span>{{ s }}</span>{% endfor %}
     </div>
     {% endif %}
 
@@ -86,7 +89,11 @@
     <form method="POST">
       <label for="email">Email</label>
       <input type="email" id="email" name="email" placeholder="you@example.com" required autofocus>
-      <button type="submit">Send my results</button>
+      <button type="submit">Save and email my results</button>
+    </form>
+    <form method="POST" class="save-only">
+      <input type="hidden" name="action" value="save_only">
+      <button type="submit" class="submit-btn secondary">Save without emailing</button>
     </form>
   {% endif %}
 </body>

@@ -18,6 +18,15 @@ def create_app():
     app.config["MAIL_PASSWORD"] = os.getenv("MAILJET_SMTP_PASSWORD")
     app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_FROM_EMAIL")
 
+    # SQLite file for course data and saved rounds (defaults to instance/golf_tracker.db)
+    app.config["DATABASE_PATH"] = os.getenv("DATABASE_PATH")
+
+    from app import db
+    db.init_app(app)
+
+    from app.cli import courses_cli
+    app.cli.add_command(courses_cli)
+
     from app.routes.main import main
     app.register_blueprint(main)
 

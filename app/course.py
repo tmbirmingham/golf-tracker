@@ -1,45 +1,54 @@
 """
-Course configuration - update with your local course details
+Helpers for the course being played in the current round.
+
+Official course details live in the database (see app/courses.py and
+app/data/courses/). When a round starts, the chosen course and tee are copied
+into the session so the round is unaffected by later course updates.
 """
+from flask import session
 
-COURSE_NAME = "Arrowhead Golf Course"
-COURSE_DESCRIPTION = "Arrowhead Golf Course, Naples, FL."
+from app.courses import build_snapshot, course_info_from_snapshot
+from app.db import get_db
 
-# Par for each hole (1-18)
-HOLE_PARS = {
-    1: 5,
-    2: 4,
-    3: 4,
-    4: 3,
-    5: 5,
-    6: 4,
-    7: 4,
-    8: 3,
-    9: 4,
-    10: 4,
-    11: 3,
-    12: 4,
-    13: 5,
-    14: 4,
-    15: 3,
-    16: 4,
-    17: 4,
-    18: 5,
-}
+DEFAULT_COURSE_SLUG = "arrowhead-golf-club-naples"
 
-def get_hole_par(hole):
-    """Get par for a specific hole (1-18)"""
-    return HOLE_PARS.get(hole, 4)
 
-def is_par_3(hole):
-    """Check if a hole is a par 3"""
-    return get_hole_par(hole) == 3
+def default_snapshot():
+    db = get_db()
+    row = db.execute("SELECT id FROM courses WHERE slug = ?", (DEFAULT_COURSE_SLUG,)).fetchone()
+    if row is None:
+        row = db.execute("SELECT id FROM courses ORDER BY id LIMIT 1").fetchone()
+    return build_snapshot(db, row["id"]) if row else None
+
+
+def current_snapshot():
+    """Snapshot for the round in progress (older sessions fall back to the default course)."""
+    snapshot = session.get("course")
+    if snapshot is None:
+        snapshot = default_snapshot()
+        session["course"] = snapshot
+    return snapshot
+
 
 def get_course_info():
-    """Get course information"""
-    return {
-        "name": COURSE_NAME,
-        "description": COURSE_DESCRIPTION,
-        "total_par": sum(HOLE_PARS.values()),
-        "holes": HOLE_PARS
-    }
+    return course_info_from_snapshot(current_snapshot())
+
+
+def hole_count():
+    return len(current_snapshot()["holes"])
+
+
+def get_hole(hole):
+    for h in current_snapshot()["holes"]:
+        if h["number"] == hole:
+            return h
+    return None
+
+
+def get_hole_par(hole):
+    h = get_hole(hole)
+    return h["par"] if h else 4
+
+
+def is_par_3(hole):
+    return get_hole_par(hole) == 3

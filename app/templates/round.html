@@ -8,16 +8,14 @@
 </head>
 <body>
   <h1>Round in Progress</h1>
-  {% if course_info %}
-  <p class="course-name">{{ course_info.name }}</p>
-  {% endif %}
+  {% include "_course_header.html" %}
 
   <p class="hint">Tap a hole to enter or edit its score and stats.</p>
 
   <div class="scorecard">
-    {% for hole_num, score, par in scorecard %}
+    {% for hole_num, score, par, yardage in scorecard %}
     <a href="{{ url_for('main.hole', hole=hole_num) }}" class="{% if score is not none %}filled{% endif %}">
-      <span class="hole">Hole {{ hole_num }} (Par {{ par }})</span>
+      <span class="hole">Hole {{ hole_num }} (Par {{ par }}){% if yardage %}<br>{{ yardage }} yds{% endif %}</span>
       <span class="score">{% if score is not none %}{{ score }}{% else %}—{% endif %}</span>
     </a>
     {% endfor %}

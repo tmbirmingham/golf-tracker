@@ -353,3 +353,48 @@ body.finish-page h1 {
   background: #e8f5e9;
   border-radius: 6px;
 }
+
+.scores {
+  overflow-x: auto;
+}
+
+.scores .yardage,
+.scores .par-cell {
+  background: #f7f7f7;
+  color: #666;
+}
+
+/* Course data */
+select {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.unverified-note {
+  font-size: 0.8rem;
+  color: #8a6d00;
+  background: #fff8e1;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.save-only {
+  margin-top: 0.5rem;
+}
+
+/* Round history */
+table.history {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+table.history th,
+table.history td {
+  padding: 0.4rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}

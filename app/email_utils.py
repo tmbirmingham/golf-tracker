@@ -128,6 +128,13 @@ def send_round_email(
 
     if course_info:
         body += f"Course: {course_info['name']}\n"
+        if course_info.get("tee_name"):
+            tee_line = f"Tees: {course_info['tee_name']}"
+            if course_info.get("total_yardage"):
+                tee_line += f" ({course_info['total_yardage']} yds)"
+            if course_info.get("course_rating") and course_info.get("slope_rating"):
+                tee_line += f", rating {course_info['course_rating']} / slope {course_info['slope_rating']}"
+            body += tee_line + "\n"
         body += f"Holes played: {num_holes}\n"
         body += f"Par for round: {total_par}\n"
         if to_par > 0:
@@ -146,7 +153,8 @@ def send_round_email(
         hole_info = f"Hole {hole_num}: {score}"
         if course_info:
             par = course_info["holes"].get(hole_num, 4)
-            hole_info += f" (Par {par})"
+            yardage = (course_info.get("yardages") or {}).get(hole_num)
+            hole_info += f" (Par {par}, {yardage} yds)" if yardage else f" (Par {par})"
 
         if putts_list and idx < len(putts_list):
             hole_info += f" Putts: {putts_list[idx]}"
