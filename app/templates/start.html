@@ -1,33 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Golf Tracker — Start Round</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body class="start-page">
-  <h1>Golf Tracker</h1>
-  <p>Enter your score for each hole. When you're done you can save the round and email yourself the summary.</p>
-  {% if error %}<p class="error">{{ error }}</p>{% endif %}
-  <form method="POST">
+{% extends "base.html" %}
+{% from "_macros.html" import field_error %}
+{% block title %}Play{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+{% if in_progress %}
+<section class="card highlight" aria-labelledby="resume-heading">
+  <h2 id="resume-heading" style="margin-top:0">Round in progress</h2>
+  <p class="muted" style="margin-top:0">
+    {% if in_progress.player_name %}{{ in_progress.player_name }} · {% endif %}{{ in_progress.course }}{% if in_progress.tee %} · {{ in_progress.tee }} tees{% endif %}
+    · {{ in_progress.holes_played }} of {{ in_progress.hole_count }} holes entered
+  </p>
+  <a class="btn block large" href="{{ url_for('main.round_dashboard') }}">Resume round</a>
+</section>
+{% endif %}
+
+<h1>{{ 'Start a new round' if in_progress else 'Record a round' }}</h1>
+<p class="lede">Enter your name, course and tees, then score each hole. Your round goes on the shared Rounds list when you save it.</p>
+
+<form method="POST" class="card" novalidate>
+  {{ csrf_field() }}
+  <div class="field">
+    <label for="player_name">Your name <span class="hint">Shown publicly on the Rounds list. A nickname is fine.</span></label>
+    <input type="text" id="player_name" name="player_name" value="{{ form.player_name }}" maxlength="40"
+           autocomplete="nickname" list="known-names" required
+           {% if errors.player_name %}aria-invalid="true" aria-describedby="player_name-error"{% endif %}>
+    <datalist id="known-names">{% for n in known_names %}<option value="{{ n }}">{% endfor %}</datalist>
+    {{ field_error(errors, 'player_name') }}
+  </div>
+
+  <div class="field">
+    <label for="played_on">Date played</label>
+    <input type="date" id="played_on" name="played_on" value="{{ form.played_on }}" required
+           {% if errors.played_on %}aria-invalid="true" aria-describedby="played_on-error"{% endif %}>
+    {{ field_error(errors, 'played_on') }}
+  </div>
+
+  <div class="field">
     <label for="course_tee">Course and tees</label>
-    <select id="course_tee" name="course_tee" required>
+    <select id="course_tee" name="course_tee" required
+            {% if errors.course_tee %}aria-invalid="true" aria-describedby="course_tee-error"{% endif %}>
       {% for course in courses %}
       <optgroup label="{{ course.name }}{% if course.city %} — {{ course.city }}, {{ course.state }}{% endif %}">
         {% for tee in course.tees %}
-        <option value="{{ course.id }}:{{ tee.id }}">
-          {{ tee.name }}{% if tee.published_yardage %} · {{ tee.published_yardage }} yds{% endif %}{% if tee.course_rating and tee.slope_rating %} · {{ tee.course_rating }}/{{ tee.slope_rating }}{% endif %}{% if tee.status != 'verified' %} (unverified){% endif %}
+        {% set value = course.id ~ ':' ~ tee.id %}
+        <option value="{{ value }}" {% if form.course_tee == value %}selected{% endif %}>
+          {{ tee.name }}{% if tee.color %} ({{ tee.color }}){% endif %}{% if tee.published_yardage %} · {{ '{:,}'.format(tee.published_yardage) }} yds{% endif %}{% if tee.course_rating and tee.slope_rating %} · {{ tee.course_rating }}/{{ tee.slope_rating }}{% endif %}{% if tee.status != 'verified' %} (unverified){% endif %}
         </option>
         {% endfor %}
-        <option value="{{ course.id }}">
+        <option value="{{ course.id }}" {% if form.course_tee == course.id|string %}selected{% endif %}>
           {{ course.name }} — {% if course.tees %}tee not listed{% else %}no tee data yet{% endif %}
         </option>
       </optgroup>
       {% endfor %}
     </select>
-    <button type="submit">Start Round</button>
-  </form>
-  <p class="end-link"><a href="{{ url_for('main.rounds_history') }}">Saved rounds</a></p>
-</body>
-</html>
+    {{ field_error(errors, 'course_tee') }}
+  </div>
+
+  {% if in_progress and in_progress.holes_played %}
+  <div class="field">
+    <label class="check">
+      <input type="checkbox" name="confirm_discard" value="yes" {% if errors.discard %}aria-describedby="discard-error"{% endif %}>
+      <span>Discard my round in progress ({{ in_progress.holes_played }} hole{{ 's' if in_progress.holes_played != 1 }} entered)</span>
+    </label>
+    {{ field_error(errors, 'discard') }}
+  </div>
+  {% endif %}
+
+  <button type="submit" class="btn block large">Start round</button>
+</form>
+{% endblock %}

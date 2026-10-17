@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "_macros.html" import tee_label %}
+{% block title %}{{ course.name }}{% endblock %}
+{% block content %}
+<h1>{{ course.name }}</h1>
+<p class="muted" style="margin-top:0">
+  {% if course.address %}{{ course.address }}{% endif %}
+  {% if course.phone %} · <a href="tel:{{ course.phone|replace('-', '') }}">{{ course.phone }}</a>{% endif %}
+  {% if course.website %} · <a href="{{ course.website }}" rel="noopener">Official site</a>{% endif %}
+</p>
+{% if course.description %}<p>{{ course.description }}</p>{% endif %}
+
+{% if tees %}
+<h2>Tees</h2>
+<table class="data stack">
+  <thead><tr><th scope="col">Tee</th><th scope="col" class="num">Yards</th><th scope="col" class="num">Par</th><th scope="col" class="num">Rating</th><th scope="col" class="num">Slope</th></tr></thead>
+  <tbody>
+    {% for t in tees %}
+    <tr>
+      <td class="primary">{{ tee_label(t.name, t.color) }}{% if t.status != 'verified' %} <span class="muted small">(unverified)</span>{% endif %}</td>
+      <td class="num" data-label="Yards">{{ '{:,}'.format(t.published_yardage) if t.published_yardage else '—' }}</td>
+      <td class="num" data-label="Par">{{ t.published_par or '—' }}</td>
+      <td class="num" data-label="Rating">{{ t.course_rating or '—' }}</td>
+      <td class="num" data-label="Slope">{{ t.slope_rating or '—' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<h2>Hole by hole</h2>
+{% if tees|length > 1 %}
+<nav class="tee-picker" aria-label="Tee to show">
+  {% for t in tees %}<a href="{{ url_for('main.course_detail', slug=course.slug, tee=t.id) }}#holes" {% if t.id == selected_tee %}aria-current="true"{% endif %}>{{ tee_label(t.name, t.color) }}</a>{% endfor %}
+</nav>
+{% endif %}
+<table class="data course-table" id="holes">
+  <thead>
+    <tr>
+      <th scope="col">Hole</th><th scope="col">Par</th><th scope="col">Hcp</th>
+      {% for t in tees %}<th scope="col" class="{{ 'tee-other' if t.id != selected_tee }}"><span class="tee-dot tee-{{ t.color }}" aria-hidden="true"></span><abbr title="{{ t.name }}">{{ t.color or t.name }}{% if t.gender == 'F' %} (L){% endif %}</abbr></th>{% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for h in holes %}
+    <tr>
+      <th scope="row">{{ h.hole_number }}</th><td>{{ h.par }}</td><td>{{ h.handicap or '—' }}</td>
+      {% for t in tees %}<td class="{{ 'tee-other' if t.id != selected_tee }}">{{ yardages[t.id].get(h.hole_number) or '—' }}</td>{% endfor %}
+    </tr>
+    {% if loop.index == 9 and holes|length == 18 %}
+    <tr class="tot">
+      <th scope="row">Out</th><td>{{ holes[:9]|sum(attribute='par') }}</td><td></td>
+      {% for t in tees %}<td class="{{ 'tee-other' if t.id != selected_tee }}"><strong>{{ totals[t.id].out or '—' }}</strong></td>{% endfor %}
+    </tr>
+    {% endif %}
+    {% endfor %}
+    {% if holes|length == 18 %}
+    <tr class="tot">
+      <th scope="row">In</th><td>{{ holes[9:]|sum(attribute='par') }}</td><td></td>
+      {% for t in tees %}<td class="{{ 'tee-other' if t.id != selected_tee }}"><strong>{{ totals[t.id]['in'] or '—' }}</strong></td>{% endfor %}
+    </tr>
+    {% endif %}
+    <tr class="tot">
+      <th scope="row">Total</th><td>{{ holes|sum(attribute='par') }}</td><td></td>
+      {% for t in tees %}<td class="{{ 'tee-other' if t.id != selected_tee }}"><strong>{{ totals[t.id].total or '—' }}</strong></td>{% endfor %}
+    </tr>
+  </tbody>
+</table>
+
+<details class="sources">
+<summary>Data sources</summary>
+<ul class="small">
+  {% for field, info in provenance|dictsort %}
+  <li><strong>{{ field }}</strong>: {{ info.status|replace('_', ' ') }}{% if info.source %} — {{ info.source }}{% endif %}{% if info.checked_on %} ({{ info.checked_on }}){% endif %}</li>
+  {% endfor %}
+</ul>
+</details>
+{% endblock %}

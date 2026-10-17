@@ -8,7 +8,7 @@
   "website": "https://www.arrowheadgolfnaples.com/golf/the-course",
   "opened_year": 1997,
   "description": "Public course in North Naples, opened in 1997, with 16 lakes, sculpted fairways, contoured greens and bunkers.",
-  "published_par": null,
+  "published_par": 72,
   "provenance": {
     "name": {
       "status": "verified",
@@ -58,114 +58,633 @@
       "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
     },
     "published_par": {
-      "status": "unverified",
-      "note": "Official scorecard (https://www.arrowheadgolfnaples.com/golf/scorecard) not yet reviewed. Secondary sources say 72; left empty until confirmed."
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner",
+      "checked_on": "2026-10-17",
+      "note": "Front 9, back 9 and total pars and yardages match the published totals; handicap indexes are 1-18 with no repeats."
     },
     "holes.par": {
-      "status": "user_entered",
-      "source": "app/course.py HOLE_PARS (pre-existing app data)",
-      "note": "Not yet checked against the official scorecard."
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner",
+      "checked_on": "2026-10-17",
+      "note": "Front 9, back 9 and total pars and yardages match the published totals; handicap indexes are 1-18 with no repeats."
     },
     "holes.handicap": {
-      "status": "unverified",
-      "note": "Not available; requires the official scorecard."
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner",
+      "checked_on": "2026-10-17",
+      "note": "Front 9, back 9 and total pars and yardages match the published totals; handicap indexes are 1-18 with no repeats."
     },
     "tees": {
-      "status": "unverified",
-      "note": "No tee data imported. Tee names, ratings, slopes and yardages require the official scorecard."
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner",
+      "checked_on": "2026-10-17",
+      "note": "Front 9, back 9 and total pars and yardages match the published totals; handicap indexes are 1-18 with no repeats."
     }
   },
   "holes": [
     {
       "number": 1,
       "par": 5,
-      "handicap": null
+      "handicap": 1
     },
     {
       "number": 2,
       "par": 4,
-      "handicap": null
+      "handicap": 9
     },
     {
       "number": 3,
       "par": 4,
-      "handicap": null
+      "handicap": 7
     },
     {
       "number": 4,
       "par": 3,
-      "handicap": null
+      "handicap": 15
     },
     {
       "number": 5,
       "par": 5,
-      "handicap": null
+      "handicap": 5
     },
     {
       "number": 6,
       "par": 4,
-      "handicap": null
+      "handicap": 11
     },
     {
       "number": 7,
       "par": 4,
-      "handicap": null
+      "handicap": 13
     },
     {
       "number": 8,
       "par": 3,
-      "handicap": null
+      "handicap": 17
     },
     {
       "number": 9,
       "par": 4,
-      "handicap": null
+      "handicap": 3
     },
     {
       "number": 10,
       "par": 4,
-      "handicap": null
+      "handicap": 10
     },
     {
       "number": 11,
       "par": 3,
-      "handicap": null
+      "handicap": 12
     },
     {
       "number": 12,
       "par": 4,
-      "handicap": null
+      "handicap": 16
     },
     {
       "number": 13,
       "par": 5,
-      "handicap": null
+      "handicap": 8
     },
     {
       "number": 14,
       "par": 4,
-      "handicap": null
+      "handicap": 4
     },
     {
       "number": 15,
       "par": 3,
-      "handicap": null
+      "handicap": 18
     },
     {
       "number": 16,
       "par": 4,
-      "handicap": null
+      "handicap": 6
     },
     {
       "number": 17,
       "par": 4,
-      "handicap": null
+      "handicap": 2
     },
     {
       "number": 18,
       "par": 5,
-      "handicap": null
+      "handicap": 14
     }
   ],
-  "tees": []
+  "tees": [
+    {
+      "name": "Championship",
+      "color": "Gold",
+      "gender": null,
+      "course_rating": 73.1,
+      "slope_rating": 130,
+      "published_par": 72,
+      "published_yardage": 6832,
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner, 2026-10-17",
+      "holes": [
+        {
+          "number": 1,
+          "yardage": 596
+        },
+        {
+          "number": 2,
+          "yardage": 377
+        },
+        {
+          "number": 3,
+          "yardage": 380
+        },
+        {
+          "number": 4,
+          "yardage": 184
+        },
+        {
+          "number": 5,
+          "yardage": 543
+        },
+        {
+          "number": 6,
+          "yardage": 353
+        },
+        {
+          "number": 7,
+          "yardage": 292
+        },
+        {
+          "number": 8,
+          "yardage": 193
+        },
+        {
+          "number": 9,
+          "yardage": 445
+        },
+        {
+          "number": 10,
+          "yardage": 412
+        },
+        {
+          "number": 11,
+          "yardage": 220
+        },
+        {
+          "number": 12,
+          "yardage": 349
+        },
+        {
+          "number": 13,
+          "yardage": 560
+        },
+        {
+          "number": 14,
+          "yardage": 392
+        },
+        {
+          "number": 15,
+          "yardage": 243
+        },
+        {
+          "number": 16,
+          "yardage": 398
+        },
+        {
+          "number": 17,
+          "yardage": 401
+        },
+        {
+          "number": 18,
+          "yardage": 494
+        }
+      ]
+    },
+    {
+      "name": "Tournament",
+      "color": "Green",
+      "gender": null,
+      "course_rating": 71.1,
+      "slope_rating": 128,
+      "published_par": 72,
+      "published_yardage": 6453,
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner, 2026-10-17",
+      "holes": [
+        {
+          "number": 1,
+          "yardage": 561
+        },
+        {
+          "number": 2,
+          "yardage": 377
+        },
+        {
+          "number": 3,
+          "yardage": 380
+        },
+        {
+          "number": 4,
+          "yardage": 184
+        },
+        {
+          "number": 5,
+          "yardage": 489
+        },
+        {
+          "number": 6,
+          "yardage": 353
+        },
+        {
+          "number": 7,
+          "yardage": 292
+        },
+        {
+          "number": 8,
+          "yardage": 146
+        },
+        {
+          "number": 9,
+          "yardage": 445
+        },
+        {
+          "number": 10,
+          "yardage": 412
+        },
+        {
+          "number": 11,
+          "yardage": 163
+        },
+        {
+          "number": 12,
+          "yardage": 349
+        },
+        {
+          "number": 13,
+          "yardage": 515
+        },
+        {
+          "number": 14,
+          "yardage": 392
+        },
+        {
+          "number": 15,
+          "yardage": 122
+        },
+        {
+          "number": 16,
+          "yardage": 398
+        },
+        {
+          "number": 17,
+          "yardage": 381
+        },
+        {
+          "number": 18,
+          "yardage": 494
+        }
+      ]
+    },
+    {
+      "name": "Back",
+      "color": "Blue",
+      "gender": null,
+      "course_rating": 69.1,
+      "slope_rating": 124,
+      "published_par": 72,
+      "published_yardage": 6011,
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner, 2026-10-17",
+      "holes": [
+        {
+          "number": 1,
+          "yardage": 561
+        },
+        {
+          "number": 2,
+          "yardage": 328
+        },
+        {
+          "number": 3,
+          "yardage": 311
+        },
+        {
+          "number": 4,
+          "yardage": 163
+        },
+        {
+          "number": 5,
+          "yardage": 489
+        },
+        {
+          "number": 6,
+          "yardage": 309
+        },
+        {
+          "number": 7,
+          "yardage": 278
+        },
+        {
+          "number": 8,
+          "yardage": 146
+        },
+        {
+          "number": 9,
+          "yardage": 418
+        },
+        {
+          "number": 10,
+          "yardage": 347
+        },
+        {
+          "number": 11,
+          "yardage": 163
+        },
+        {
+          "number": 12,
+          "yardage": 321
+        },
+        {
+          "number": 13,
+          "yardage": 515
+        },
+        {
+          "number": 14,
+          "yardage": 359
+        },
+        {
+          "number": 15,
+          "yardage": 122
+        },
+        {
+          "number": 16,
+          "yardage": 354
+        },
+        {
+          "number": 17,
+          "yardage": 381
+        },
+        {
+          "number": 18,
+          "yardage": 446
+        }
+      ]
+    },
+    {
+      "name": "Middle",
+      "color": "White",
+      "gender": null,
+      "course_rating": 65.9,
+      "slope_rating": 114,
+      "published_par": 72,
+      "published_yardage": 5243,
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner, 2026-10-17",
+      "holes": [
+        {
+          "number": 1,
+          "yardage": 538
+        },
+        {
+          "number": 2,
+          "yardage": 286
+        },
+        {
+          "number": 3,
+          "yardage": 271
+        },
+        {
+          "number": 4,
+          "yardage": 124
+        },
+        {
+          "number": 5,
+          "yardage": 420
+        },
+        {
+          "number": 6,
+          "yardage": 279
+        },
+        {
+          "number": 7,
+          "yardage": 238
+        },
+        {
+          "number": 8,
+          "yardage": 112
+        },
+        {
+          "number": 9,
+          "yardage": 389
+        },
+        {
+          "number": 10,
+          "yardage": 293
+        },
+        {
+          "number": 11,
+          "yardage": 131
+        },
+        {
+          "number": 12,
+          "yardage": 272
+        },
+        {
+          "number": 13,
+          "yardage": 454
+        },
+        {
+          "number": 14,
+          "yardage": 293
+        },
+        {
+          "number": 15,
+          "yardage": 91
+        },
+        {
+          "number": 16,
+          "yardage": 318
+        },
+        {
+          "number": 17,
+          "yardage": 316
+        },
+        {
+          "number": 18,
+          "yardage": 418
+        }
+      ]
+    },
+    {
+      "name": "Middle (L)",
+      "color": "White",
+      "gender": "F",
+      "course_rating": 71.0,
+      "slope_rating": 123,
+      "published_par": 72,
+      "published_yardage": 5243,
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner, 2026-10-17",
+      "holes": [
+        {
+          "number": 1,
+          "yardage": 538
+        },
+        {
+          "number": 2,
+          "yardage": 286
+        },
+        {
+          "number": 3,
+          "yardage": 271
+        },
+        {
+          "number": 4,
+          "yardage": 124
+        },
+        {
+          "number": 5,
+          "yardage": 420
+        },
+        {
+          "number": 6,
+          "yardage": 279
+        },
+        {
+          "number": 7,
+          "yardage": 238
+        },
+        {
+          "number": 8,
+          "yardage": 112
+        },
+        {
+          "number": 9,
+          "yardage": 389
+        },
+        {
+          "number": 10,
+          "yardage": 293
+        },
+        {
+          "number": 11,
+          "yardage": 131
+        },
+        {
+          "number": 12,
+          "yardage": 272
+        },
+        {
+          "number": 13,
+          "yardage": 454
+        },
+        {
+          "number": 14,
+          "yardage": 293
+        },
+        {
+          "number": 15,
+          "yardage": 91
+        },
+        {
+          "number": 16,
+          "yardage": 318
+        },
+        {
+          "number": 17,
+          "yardage": 316
+        },
+        {
+          "number": 18,
+          "yardage": 418
+        }
+      ]
+    },
+    {
+      "name": "Forward",
+      "color": "Red",
+      "gender": null,
+      "course_rating": 67.1,
+      "slope_rating": 112,
+      "published_par": 72,
+      "published_yardage": 4604,
+      "status": "verified",
+      "source": "Official ArrowHead Golf Club scorecard, supplied by the app owner, 2026-10-17",
+      "holes": [
+        {
+          "number": 1,
+          "yardage": 447
+        },
+        {
+          "number": 2,
+          "yardage": 253
+        },
+        {
+          "number": 3,
+          "yardage": 245
+        },
+        {
+          "number": 4,
+          "yardage": 94
+        },
+        {
+          "number": 5,
+          "yardage": 352
+        },
+        {
+          "number": 6,
+          "yardage": 253
+        },
+        {
+          "number": 7,
+          "yardage": 209
+        },
+        {
+          "number": 8,
+          "yardage": 90
+        },
+        {
+          "number": 9,
+          "yardage": 289
+        },
+        {
+          "number": 10,
+          "yardage": 263
+        },
+        {
+          "number": 11,
+          "yardage": 102
+        },
+        {
+          "number": 12,
+          "yardage": 244
+        },
+        {
+          "number": 13,
+          "yardage": 405
+        },
+        {
+          "number": 14,
+          "yardage": 288
+        },
+        {
+          "number": 15,
+          "yardage": 86
+        },
+        {
+          "number": 16,
+          "yardage": 313
+        },
+        {
+          "number": 17,
+          "yardage": 311
+        },
+        {
+          "number": 18,
+          "yardage": 360
+        }
+      ]
+    }
+  ],
+  "data_version": 2
 }

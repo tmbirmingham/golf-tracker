@@ -1,100 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Round complete — Golf Tracker</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body class="finish-page">
-  <h1>Round complete</h1>
+{% extends "base.html" %}
+{% from "_macros.html" import course_header, fmt_par %}
+{% block title %}Save round{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<h1>Review and save</h1>
+{{ course_header(course_info, player_name, played_on) }}
 
-  {% if sent or saved %}
-    {% if sent %}<p class="sent">Your round summary has been sent to {{ to_email }}.</p>{% endif %}
-    <p class="sent">Round saved. <a href="{{ url_for('main.rounds_history') }}">View saved rounds</a></p>
-    <p class="total">Total score: <strong>{{ total }}</strong></p>
-    {% if num_holes %}<p class="holes-count">{{ num_holes }} hole{{ 's' if num_holes != 1 else '' }}</p>{% endif %}
-    {% if total_par %}
-    <p class="to-par">
-      {% if to_par > 0 %}+{{ to_par }}{% elif to_par < 0 %}{{ to_par }}{% else %}Even{% endif %}
-      (Par {{ total_par }})
-    </p>
-    {% endif %}
-  {% else %}
-    {% include "_course_header.html" %}
-    {% if num_holes %}
-    <p class="holes-count">Summary for {{ num_holes }} hole{{ 's' if num_holes != 1 else '' }}</p>
-    {% endif %}
+<div class="tiles">
+  <div class="tile"><p class="value">{{ total }}</p><p class="label">Strokes</p></div>
+  <div class="tile"><p class="value">{{ fmt_par(to_par) }}</p><p class="label">To par ({{ total_par }})</p></div>
+  <div class="tile"><p class="value">{{ num_holes }}</p><p class="label">Holes</p></div>
+</div>
 
-    <p class="total">Total score: {{ total }}</p>
-    {% if total_par %}
-    <p class="to-par">
-      {% if to_par > 0 %}+{{ to_par }}{% elif to_par < 0 %}{{ to_par }}{% else %}Even{% endif %}
-      (Par {{ total_par }})
-    </p>
-    {% endif %}
+{% if missing %}
+<p class="note">
+  {{ missing|length }} hole{{ 's' if missing|length != 1 }} not entered ({{ missing|join(', ') }}).
+  You can save now. The round will show {{ num_holes }} holes, and it will appear on the leaderboard only if that's a full 9 or 18.
+  <a href="{{ url_for('main.hole', hole=missing[0]) }}">Enter hole {{ missing[0] }}</a>
+</p>
+{% endif %}
 
-    {% if holes_played and scores_list %}
-    <h2>Scorecard</h2>
-    <div class="scores" style="grid-template-columns: repeat({{ holes_played|length + 1 }}, minmax(2.25rem, 1fr));">
-      <span class="label">Hole</span>{% for h in holes_played %}<span class="label">{{ h }}</span>{% endfor %}
-      {% if yardages_list and yardages_list|select|list|length == yardages_list|length %}
-      <span class="label">Yds</span>{% for y in yardages_list %}<span class="yardage">{{ y }}</span>{% endfor %}
-      {% endif %}
-      <span class="label">Par</span>{% for p in pars_list %}<span class="par-cell">{{ p }}</span>{% endfor %}
-      <span class="label">Score</span>{% for s in scores_list %}<span>{{ s }}</span>{% endfor %}
-    </div>
-    {% endif %}
-
-    {% if gir_count is defined or fairway_total is defined or total_putts is defined %}
-    <h2>Statistics</h2>
-    <div class="stats-grid">
-      {% if gir_count is defined %}
-      <div class="stat-box">
-        <div class="stat-value">{{ gir_count }}</div>
-        <div class="stat-label">Greens in Regulation</div>
-      </div>
-      {% endif %}
-      {% if total_putts is defined %}
-      <div class="stat-box">
-        <div class="stat-value">{{ total_putts }}</div>
-        <div class="stat-label">Total Putts ({{ putts_avg }} avg)</div>
-      </div>
-      {% endif %}
-      {% if fairway_total is defined and fairway_total > 0 %}
-      <div class="stat-box">
-        <div class="stat-value">{{ fairway_hit }}/{{ fairway_total }}</div>
-        <div class="stat-label">Fairways Hit</div>
-      </div>
-      {% endif %}
-      {% if fairway_left is defined and fairway_left > 0 %}
-      <div class="stat-box">
-        <div class="stat-value">{{ fairway_left }}</div>
-        <div class="stat-label">Missed Left</div>
-      </div>
-      {% endif %}
-      {% if fairway_right is defined and fairway_right > 0 %}
-      <div class="stat-box">
-        <div class="stat-value">{{ fairway_right }}</div>
-        <div class="stat-label">Missed Right</div>
-      </div>
-      {% endif %}
-    </div>
-    {% endif %}
-
-    <h2>Email Summary</h2>
-    <p>Enter your email to receive a detailed summary:</p>
-    {% if error %}<p class="error">{{ error }}</p>{% endif %}
-
-    <form method="POST">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="you@example.com" required autofocus>
-      <button type="submit">Save and email my results</button>
-    </form>
-    <form method="POST" class="save-only">
-      <input type="hidden" name="action" value="save_only">
-      <button type="submit" class="submit-btn secondary">Save without emailing</button>
-    </form>
+<form method="POST" class="card">
+  {{ csrf_field() }}
+  {% if not player_name %}
+  <div class="field">
+    <label for="player_name">Your name <span class="hint">Shown publicly on the Rounds list.</span></label>
+    <input type="text" id="player_name" name="player_name" maxlength="40" required
+           {% if name_error %}aria-invalid="true" aria-describedby="name-error"{% endif %}>
+    {% if name_error %}<p class="field-error" id="name-error">{{ name_error }}</p>{% endif %}
+  </div>
   {% endif %}
-</body>
-</html>
+  <button type="submit" class="btn block large">Save round</button>
+  <p class="muted small" style="margin-bottom:0">After saving you can email yourself a copy of the scorecard.</p>
+</form>
+<p class="small"><a href="{{ url_for('main.round_dashboard') }}">Back to scorecard</a></p>
+{% endblock %}

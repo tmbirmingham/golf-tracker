@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import tee_label %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<h1>Courses</h1>
+{% for c in courses %}
+<section class="card">
+  <h2 style="margin-top:0"><a href="{{ url_for('main.course_detail', slug=c.slug) }}">{{ c.name }}</a></h2>
+  <p class="muted" style="margin-top:0">{{ c.city }}{% if c.state %}, {{ c.state }}{% endif %}</p>
+  {% if c.tees %}
+  <ul class="small" style="padding-left:1.1rem">
+    {% for t in c.tees %}
+    <li>{{ tee_label(t.name, t.color) }}{% if t.published_yardage %} · {{ '{:,}'.format(t.published_yardage) }} yds{% endif %}{% if t.course_rating %} · {{ t.course_rating }}/{{ t.slope_rating }}{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted small">No tee data yet.</p>
+  {% endif %}
+</section>
+{% else %}
+<div class="card empty"><p>No courses yet.</p></div>
+{% endfor %}
+{% endblock %}

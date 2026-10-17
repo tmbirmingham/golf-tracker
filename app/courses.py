@@ -16,7 +16,7 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cou
 PROVENANCE_STATUSES = ("verified", "unverified", "user_entered")
 COURSE_FIELDS = (
     "name", "address", "city", "state", "phone", "website",
-    "opened_year", "description", "published_par",
+    "opened_year", "description", "published_par", "data_version",
 )
 
 
@@ -35,6 +35,9 @@ def validate_course_data(data):
         errors.append("slug is required")
     if not data.get("name"):
         errors.append("name is required")
+    version = data.get("data_version", 1)
+    if not isinstance(version, int) or version < 1:
+        errors.append("data_version must be a positive integer")
 
     for field, info in (data.get("provenance") or {}).items():
         if info.get("status") not in PROVENANCE_STATUSES:
@@ -140,6 +143,7 @@ def import_course(conn, data, update=False):
             return "skipped"
 
         values = [data.get(f) for f in COURSE_FIELDS]
+        values[COURSE_FIELDS.index("data_version")] = data.get("data_version", 1)
         provenance = json.dumps(data.get("provenance") or {}, sort_keys=True)
         if row:
             course_id = row["id"]
@@ -197,9 +201,21 @@ def bundled_course_files():
 
 
 def seed_bundled_courses(conn):
-    """Import bundled course files that aren't in the database yet."""
+    """
+    Import bundled course files that aren't in the database yet, and re-apply
+    a file whose data_version is higher than the version stored. Bumping
+    data_version in a committed file is the deliberate way to roll out
+    corrected course data on deploy.
+    """
     for path in bundled_course_files():
-        import_course(conn, load_course_file(path), update=False)
+        data = load_course_file(path)
+        row = conn.execute(
+            "SELECT data_version FROM courses WHERE slug = ?", (data.get("slug"),)
+        ).fetchone()
+        if row is None:
+            import_course(conn, data, update=False)
+        elif data.get("data_version", 1) > row["data_version"]:
+            import_course(conn, data, update=True)
 
 
 # -------------------------------------------------------------------- queries

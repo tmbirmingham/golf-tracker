@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import scorecard, fmt_par %}
+{% block title %}{{ rnd.player_name or 'Round' }} · {{ rnd.played_on }}{% endblock %}
+{% block content %}
+<h1>{{ rnd.player_name or 'Unnamed player' }}</h1>
+<p class="muted" style="margin-top:0">
+  {{ rnd.played_on }} · {{ rnd.course_name }}{% if rnd.tee_name %} · {{ rnd.tee_name }} tees{% endif %}
+  {% if rnd.snapshot.course_rating and rnd.snapshot.slope_rating %} · {{ rnd.snapshot.course_rating }}/{{ rnd.snapshot.slope_rating }}{% endif %}
+</p>
+
+<div class="tiles">
+  <div class="tile"><p class="value">{{ rnd.total_score }}</p><p class="label">Strokes</p></div>
+  <div class="tile"><p class="value">{{ fmt_par(rnd.to_par) }}</p><p class="label">To par ({{ rnd.total_par }})</p></div>
+  <div class="tile"><p class="value">{{ rnd.holes_played }}</p><p class="label">Holes</p></div>
+  {% set putts = rnd.holes.values()|selectattr('putts', 'ne', none)|map(attribute='putts')|list %}
+  {% if putts %}<div class="tile"><p class="value">{{ putts|sum }}</p><p class="label">Putts</p></div>{% endif %}
+</div>
+
+{{ scorecard(rnd.snapshot.holes, rnd.scores, rnd.tee_name) }}
+
+{% if can_email %}
+<section class="card" aria-labelledby="email-heading">
+  <h2 id="email-heading" style="margin-top:0">Email me a copy</h2>
+  <form method="POST" action="{{ url_for('main.email_round', round_id=rnd.id) }}">
+    {{ csrf_field() }}
+    <div class="field">
+      <label for="email">Email address <span class="hint">Used only to send this summary. It isn't stored or shown anywhere.</span></label>
+      <input type="email" id="email" name="email" autocomplete="email" maxlength="254" required>
+    </div>
+    <button type="submit" class="btn">Send summary</button>
+  </form>
+</section>
+{% endif %}
+
+<div class="btn-row">
+  <a class="btn secondary" href="{{ url_for('main.rounds_list') }}">All rounds</a>
+  <a class="btn" href="{{ url_for('main.start_round') }}">Record a round</a>
+</div>
+{% endblock %}

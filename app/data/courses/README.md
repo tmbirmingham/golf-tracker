@@ -32,7 +32,10 @@ Unverified and user-entered data is labeled in the app during a round.
    scorecard, so the hole-by-hole numbers are checked against them.
 2. Run `flask courses validate`. It checks hole numbering, pars, handicaps,
    ratings, and that pars and yardages add up to the published totals.
-3. Run `flask courses import --update` to apply the changes to an existing
-   database. This upserts the course, its holes and its tees and never deletes
+3. To roll the change out on the next deploy, increase `data_version` in the
+   file. On startup the app re-applies any bundled file whose `data_version` is
+   higher than the copy in the database. No shell access is needed. Or run
+   `flask courses import --update` to apply the changes to an existing
+   database by hand. This upserts the course, its holes and its tees and never deletes
    anything. Saved rounds keep their own snapshot of the course as it was
    played, so their scores and to-par figures don't change.

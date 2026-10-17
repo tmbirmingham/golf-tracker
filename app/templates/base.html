@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173d2c">
+  <title>{% block title %}Golf Tracker{% endblock %} · Golf Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="{{ url_for('main.start_round') }}">Golf<span>Tracker</span></a>
+      {% set ep = request.endpoint or '' %}
+      <nav class="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="{{ url_for('main.round_dashboard') if session.get('scores') is not none else url_for('main.start_round') }}"
+                 {% if ep in ('main.start_round', 'main.round_dashboard', 'main.hole', 'main.finish') %}aria-current="page"{% endif %}>
+                 {{ 'Resume' if session.get('scores') is not none else 'Play' }}</a></li>
+          <li><a href="{{ url_for('main.rounds_list') }}" {% if ep in ('main.rounds_list', 'main.round_detail') %}aria-current="page"{% endif %}>Rounds</a></li>
+          <li><a href="{{ url_for('main.courses_list') }}" {% if ep in ('main.courses_list', 'main.course_detail') %}aria-current="page"{% endif %}>Courses</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="{% block main_class %}{% endblock %}">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="flash {{ 'error' if category == 'error' }}" role="{{ 'alert' if category == 'error' else 'status' }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

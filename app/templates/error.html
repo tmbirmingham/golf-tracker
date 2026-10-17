@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ error.name }}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="card empty">
+  <h1>{{ {400: 'Something went wrong with that form', 403: "That isn't available", 404: 'Page not found'}.get(error.code, error.name) }}</h1>
+  {% if error.code == 400 %}<p>{{ error.description }}</p>{% endif %}
+  <a class="btn" href="{{ url_for('main.start_round') }}">Go to start</a>
+</div>
+{% endblock %}
