@@ -30,12 +30,12 @@
 </head>
 <body>
   <h1>Hole {{ hole }}</h1>
-  <p class="progress">Hole {{ hole }} of 18</p>
-  <p class="par">Par {{ par }}</p>
+  <p class="progress">Hole {{ hole }} of {{ last_hole }}{% if course_info %} · {{ course_info.name }}{% if course_info.tee_name %}, {{ course_info.tee_name }} tees{% endif %}{% endif %}</p>
+  <p class="par">Par {{ par }}{% if yardage %} · {{ yardage }} yds{% endif %}{% if handicap %} · Hcp {{ handicap }}{% endif %}</p>
 
   <form method="POST" id="holeForm">
     <label for="score">Score</label>
-    <input type="number" id="score" name="score" min="1" max="20" value="{{ par }}" required autofocus>
+    <input type="number" id="score" name="score" min="1" max="20" value="{{ current_score or par }}" required autofocus>
 
     <label for="putts">Putts</label>
     <input type="number" id="putts" name="putts" min="0" max="10" value="{{ current_putts }}" required>
@@ -61,7 +61,7 @@
     {% endif %}
 
     <button type="submit" class="submit-btn">
-      {% if hole == 18 %}Finish round{% else %}Next hole →{% endif %}
+      {% if hole == last_hole %}Finish round{% else %}Next hole →{% endif %}
     </button>
   </form>
 

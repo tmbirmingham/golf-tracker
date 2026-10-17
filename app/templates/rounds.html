@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved rounds — Golf Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <h1>Saved rounds</h1>
+  {% if rounds %}
+  <table class="history">
+    <thead><tr><th>Date</th><th>Course</th><th>Holes</th><th>Score</th></tr></thead>
+    <tbody>
+      {% for r in rounds %}
+      <tr>
+        <td>{{ r.played_on }}</td>
+        <td>{{ r.course_name }}{% if r.tee_name %} ({{ r.tee_name }}){% endif %}</td>
+        <td>{{ r.holes_played }}</td>
+        <td>{{ r.total }} ({% if r.to_par > 0 %}+{{ r.to_par }}{% elif r.to_par < 0 %}{{ r.to_par }}{% else %}E{% endif %})</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="hint">No saved rounds yet.</p>
+  {% endif %}
+  <p class="end-link"><a href="{{ url_for('main.start_round') }}">Start a round</a></p>
+</body>
+</html>

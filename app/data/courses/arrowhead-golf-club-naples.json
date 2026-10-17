@@ -1,0 +1,171 @@
+{
+  "slug": "arrowhead-golf-club-naples",
+  "name": "ArrowHead Golf Club",
+  "address": "2205 Heritage Greens Drive, Naples, FL 34119",
+  "city": "Naples",
+  "state": "FL",
+  "phone": "239-596-1000",
+  "website": "https://www.arrowheadgolfnaples.com/golf/the-course",
+  "opened_year": 1997,
+  "description": "Public course in North Naples, opened in 1997, with 16 lakes, sculpted fairways, contoured greens and bunkers.",
+  "published_par": null,
+  "provenance": {
+    "name": {
+      "status": "verified",
+      "source": "https://www.arrowheadgolfnaples.com/golf/the-course",
+      "checked_on": "2026-10-16",
+      "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
+    },
+    "address": {
+      "status": "verified",
+      "source": "https://arrowheadgolfnaples.com/general-information/contactus",
+      "checked_on": "2026-10-16",
+      "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
+    },
+    "city": {
+      "status": "verified",
+      "source": "https://arrowheadgolfnaples.com/general-information/contactus",
+      "checked_on": "2026-10-16",
+      "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
+    },
+    "state": {
+      "status": "verified",
+      "source": "https://arrowheadgolfnaples.com/general-information/contactus",
+      "checked_on": "2026-10-16",
+      "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
+    },
+    "phone": {
+      "status": "verified",
+      "source": "https://arrowheadgolfnaples.com/general-information/contactus",
+      "checked_on": "2026-10-16",
+      "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
+    },
+    "website": {
+      "status": "verified",
+      "source": "https://www.arrowheadgolfnaples.com/golf/the-course",
+      "checked_on": "2026-10-16"
+    },
+    "opened_year": {
+      "status": "verified",
+      "source": "https://www.arrowheadgolfnaples.com/golf/the-course",
+      "checked_on": "2026-10-16",
+      "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
+    },
+    "description": {
+      "status": "verified",
+      "source": "https://www.arrowheadgolfnaples.com/golf/the-course",
+      "checked_on": "2026-10-16",
+      "note": "Text from the official site as indexed by web search on 2026-10-16; the page itself could not be loaded from the build environment. Re-check on the live page."
+    },
+    "published_par": {
+      "status": "unverified",
+      "note": "Official scorecard (https://www.arrowheadgolfnaples.com/golf/scorecard) not yet reviewed. Secondary sources say 72; left empty until confirmed."
+    },
+    "holes.par": {
+      "status": "user_entered",
+      "source": "app/course.py HOLE_PARS (pre-existing app data)",
+      "note": "Not yet checked against the official scorecard."
+    },
+    "holes.handicap": {
+      "status": "unverified",
+      "note": "Not available; requires the official scorecard."
+    },
+    "tees": {
+      "status": "unverified",
+      "note": "No tee data imported. Tee names, ratings, slopes and yardages require the official scorecard."
+    }
+  },
+  "holes": [
+    {
+      "number": 1,
+      "par": 5,
+      "handicap": null
+    },
+    {
+      "number": 2,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 3,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 4,
+      "par": 3,
+      "handicap": null
+    },
+    {
+      "number": 5,
+      "par": 5,
+      "handicap": null
+    },
+    {
+      "number": 6,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 7,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 8,
+      "par": 3,
+      "handicap": null
+    },
+    {
+      "number": 9,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 10,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 11,
+      "par": 3,
+      "handicap": null
+    },
+    {
+      "number": 12,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 13,
+      "par": 5,
+      "handicap": null
+    },
+    {
+      "number": 14,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 15,
+      "par": 3,
+      "handicap": null
+    },
+    {
+      "number": 16,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 17,
+      "par": 4,
+      "handicap": null
+    },
+    {
+      "number": 18,
+      "par": 5,
+      "handicap": null
+    }
+  ],
+  "tees": []
+}

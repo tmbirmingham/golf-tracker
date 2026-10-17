@@ -8,12 +8,26 @@
 </head>
 <body class="start-page">
   <h1>Golf Tracker</h1>
-  {% if course_info %}
-  <p class="course-name">{{ course_info.name }}</p>
-  {% endif %}
-  <p>Enter your score for each hole. After hole 18 you can email yourself the summary.</p>
+  <p>Enter your score for each hole. When you're done you can save the round and email yourself the summary.</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
   <form method="POST">
+    <label for="course_tee">Course and tees</label>
+    <select id="course_tee" name="course_tee" required>
+      {% for course in courses %}
+      <optgroup label="{{ course.name }}{% if course.city %} — {{ course.city }}, {{ course.state }}{% endif %}">
+        {% for tee in course.tees %}
+        <option value="{{ course.id }}:{{ tee.id }}">
+          {{ tee.name }}{% if tee.published_yardage %} · {{ tee.published_yardage }} yds{% endif %}{% if tee.course_rating and tee.slope_rating %} · {{ tee.course_rating }}/{{ tee.slope_rating }}{% endif %}{% if tee.status != 'verified' %} (unverified){% endif %}
+        </option>
+        {% endfor %}
+        <option value="{{ course.id }}">
+          {{ course.name }} — {% if course.tees %}tee not listed{% else %}no tee data yet{% endif %}
+        </option>
+      </optgroup>
+      {% endfor %}
+    </select>
     <button type="submit">Start Round</button>
   </form>
+  <p class="end-link"><a href="{{ url_for('main.rounds_history') }}">Saved rounds</a></p>
 </body>
 </html>

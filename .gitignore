@@ -10,3 +10,7 @@ venv/
 
 # Environment variables
 .env
+
+# Local database
+instance/
+*.db
