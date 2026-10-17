@@ -1,30 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Saved rounds — Golf Tracker</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-  <h1>Saved rounds</h1>
-  {% if rounds %}
-  <table class="history">
-    <thead><tr><th>Date</th><th>Course</th><th>Holes</th><th>Score</th></tr></thead>
-    <tbody>
-      {% for r in rounds %}
-      <tr>
-        <td>{{ r.played_on }}</td>
-        <td>{{ r.course_name }}{% if r.tee_name %} ({{ r.tee_name }}){% endif %}</td>
-        <td>{{ r.holes_played }}</td>
-        <td>{{ r.total }} ({% if r.to_par > 0 %}+{{ r.to_par }}{% elif r.to_par < 0 %}{{ r.to_par }}{% else %}E{% endif %})</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{% extends "base.html" %}
+{% from "_macros.html" import fmt_par %}
+{% block title %}{{ 'Leaderboard' if filters.view == 'best' else 'Rounds' }}{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1 style="margin:0">{{ 'Leaderboard' if filters.view == 'best' else 'Recent rounds' }}</h1>
+  <nav class="view-toggle" aria-label="View">
+    <a href="{{ page_url(view='recent', page=None, holes=(filters.holes if request.args.get('holes') else None)) }}" {% if filters.view == 'recent' %}aria-current="true"{% endif %}>Recent</a>
+    <a href="{{ page_url(view='best', page=None) }}" {% if filters.view == 'best' %}aria-current="true"{% endif %}>Leaderboard</a>
+  </nav>
+</div>
+<p class="lede">
+  {% if filters.view == 'best' %}
+  Individual rounds ranked by score to par, best first. Only complete {{ filters.holes }}-hole rounds are ranked.
   {% else %}
-  <p class="hint">No saved rounds yet.</p>
+  Every saved round from every player, newest first.
   {% endif %}
-  <p class="end-link"><a href="{{ url_for('main.start_round') }}">Start a round</a></p>
-</body>
-</html>
+</p>
+
+{% set active = filters.player or filters.course or filters.tee or filters.date_from or filters.date_to or (filters.holes and filters.view == 'recent') %}
+<details class="card filter-panel" {% if active %}open{% endif %}>
+  <summary>Search and filter{% if active %} (filters on){% endif %}</summary>
+  <form method="GET" class="filters" role="search">
+    <input type="hidden" name="view" value="{{ filters.view }}">
+    <div class="field wide">
+      <label for="f-player">Player</label>
+      <input type="search" id="f-player" name="player" value="{{ filters.player }}" list="known-names" placeholder="Any player">
+      <datalist id="known-names">{% for n in known_names %}<option value="{{ n }}">{% endfor %}</datalist>
+    </div>
+    <div class="field wide">
+      <label for="f-course">Course</label>
+      <select id="f-course" name="course">
+        <option value="">All courses</option>
+        {% for c in courses %}<option value="{{ c.id }}" {% if filters.course == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-tee">Tee</label>
+      <select id="f-tee" name="tee">
+        <option value="">All tees</option>
+        {% for t in tees %}<option value="{{ t }}" {% if filters.tee == t %}selected{% endif %}>{{ t }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-holes">Holes</label>
+      <select id="f-holes" name="holes">
+        {% if filters.view == 'recent' %}<option value="">Any</option>{% endif %}
+        <option value="18" {% if filters.holes == '18' %}selected{% endif %}>18 holes</option>
+        <option value="9" {% if filters.holes == '9' %}selected{% endif %}>9 holes</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="f-from">From</label>
+      <input type="date" id="f-from" name="from" value="{{ filters.date_from }}">
+    </div>
+    <div class="field">
+      <label for="f-to">To</label>
+      <input type="date" id="f-to" name="to" value="{{ filters.date_to }}">
+    </div>
+    <div class="actions btn-row wide">
+      <button type="submit" class="btn">Apply</button>
+      <a class="btn secondary" href="{{ url_for('main.rounds_list', view=filters.view) }}">Clear</a>
+    </div>
+  </form>
+</details>
+
+{% if rounds %}
+<p class="muted small" aria-live="polite">{{ total }} round{{ 's' if total != 1 }}{% if pages > 1 %} · page {{ filters.page }} of {{ pages }}{% endif %}</p>
+<table class="data stack">
+  <thead>
+    <tr>
+      {% if filters.view == 'best' %}<th scope="col">#</th>{% endif %}
+      <th scope="col">Player</th>
+      <th scope="col">Date</th>
+      <th scope="col">Course</th>
+      <th scope="col">Tee</th>
+      <th scope="col" class="num">Holes</th>
+      <th scope="col" class="num">Score</th>
+      <th scope="col" class="num">To par</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rounds %}
+    <tr>
+      {% if filters.view == 'best' %}<td class="rank">{{ r.rank }}</td>{% endif %}
+      <td class="primary"><a href="{{ url_for('main.round_detail', round_id=r.id) }}">{{ r.player_name or 'Unnamed player' }}</a></td>
+      <td data-label="">{{ r.played_on }}</td>
+      <td class="wide" data-label="">{{ r.course_name }}</td>
+      <td data-label="Tee">{{ r.tee_name or '—' }}</td>
+      <td class="num" data-label="Holes">{{ r.holes_played }}</td>
+      <td class="num" data-label="Score"><strong>{{ r.total_score }}</strong></td>
+      <td class="num" data-label="To par"><span class="topar {{ 'under' if r.to_par < 0 }}">{{ fmt_par(r.to_par) }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if pages > 1 %}
+<nav class="pagination" aria-label="Pages">
+  {% if filters.page > 1 %}<a class="btn secondary" href="{{ page_url(page=filters.page - 1) }}" rel="prev">← Newer</a>{% else %}<span></span>{% endif %}
+  <span class="muted small">Page {{ filters.page }} of {{ pages }}</span>
+  {% if filters.page < pages %}<a class="btn secondary" href="{{ page_url(page=filters.page + 1) }}" rel="next">{{ 'Next' if filters.view == 'best' else 'Older' }} →</a>{% else %}<span></span>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<div class="card empty">
+  {% if active or filters.view == 'best' %}
+  <p>No rounds match{% if filters.view == 'best' %} — the leaderboard only ranks complete {{ filters.holes }}-hole rounds{% endif %}.</p>
+  <a class="btn secondary" href="{{ url_for('main.rounds_list') }}">Show all rounds</a>
+  {% else %}
+  <p>No rounds saved yet.</p>
+  <a class="btn" href="{{ url_for('main.start_round') }}">Record the first round</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,15 +1,33 @@
 """
 SQLite storage for course reference data and saved rounds.
 
-Migrations are additive (CREATE ... IF NOT EXISTS) and recorded in
-schema_migrations, so running init_db() repeatedly is safe and never drops data.
+Migrations only add tables, columns and indexes, and each one is recorded in
+schema_migrations, so running them repeatedly is safe and never drops data.
 """
+import json
 import os
 import sqlite3
 
 from flask import current_app, g
 
-# Each entry is (version, sql). Only ever append new versions; never edit or
+
+def _backfill_round_totals(conn):
+    """Fill the stored totals for rounds saved before migration 2."""
+    rows = conn.execute(
+        "SELECT id, course_snapshot FROM rounds WHERE holes_played IS NULL"
+    ).fetchall()
+    for r in rows:
+        pars = {h["number"]: h["par"] for h in json.loads(r[1])["holes"]}
+        holes = conn.execute(
+            "SELECT hole_number, score FROM round_holes WHERE round_id = ?", (r[0],)
+        ).fetchall()
+        conn.execute(
+            "UPDATE rounds SET holes_played = ?, total_score = ?, total_par = ? WHERE id = ?",
+            (len(holes), sum(h[1] for h in holes), sum(pars.get(h[0], 0) for h in holes), r[0]),
+        )
+
+
+# Each entry is (version, sql or callable). Only ever append new versions; never edit or
 # remove an applied one.
 MIGRATIONS = [
     (
@@ -92,6 +110,36 @@ MIGRATIONS = [
         );
         """,
     ),
+    (
+        2,
+        """
+        -- Player display name as entered, plus a normalized form for searching.
+        -- A name is a label, not an identity: same-named players are not merged.
+        ALTER TABLE rounds ADD COLUMN player_name TEXT;
+        ALTER TABLE rounds ADD COLUMN player_key TEXT;
+        -- Stored totals so the rounds list can sort and filter in SQL.
+        ALTER TABLE rounds ADD COLUMN holes_played INTEGER;
+        ALTER TABLE rounds ADD COLUMN total_score INTEGER;
+        ALTER TABLE rounds ADD COLUMN total_par INTEGER;
+        CREATE INDEX IF NOT EXISTS idx_rounds_played_on ON rounds (played_on);
+        CREATE INDEX IF NOT EXISTS idx_rounds_player_key ON rounds (player_key);
+
+        -- Version of the bundled course file last applied, so corrected course
+        -- data can be rolled out by bumping data_version in the file.
+        ALTER TABLE courses ADD COLUMN data_version INTEGER NOT NULL DEFAULT 1;
+
+        -- Email sends, for rate limiting. Stores no email addresses; the
+        -- client address is kept only as a salted hash.
+        CREATE TABLE IF NOT EXISTS email_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            round_id TEXT,
+            client_hash TEXT NOT NULL,
+            sent_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_email_log_sent_at ON email_log (sent_at);
+        """,
+    ),
+    (3, _backfill_round_totals),
 ]
 
 
@@ -122,22 +170,47 @@ def close_db(_exc=None):
         db.close()
 
 
+def _statements(sql):
+    """Split a migration script into individual statements."""
+    statements, buf = [], ""
+    for line in sql.splitlines(keepends=True):
+        buf += line
+        if sqlite3.complete_statement(buf):
+            if buf.strip():
+                statements.append(buf.strip())
+            buf = ""
+    if buf.strip():
+        statements.append(buf.strip())
+    return statements
+
+
 def migrate(conn):
-    """Apply any migrations not yet recorded. Safe to run repeatedly."""
+    """Apply any migrations not yet recorded. Safe to run repeatedly and from
+    several processes at once: each version is re-checked inside its own
+    write transaction."""
     conn.execute(
         "CREATE TABLE IF NOT EXISTS schema_migrations ("
         "version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT (datetime('now')))"
     )
     conn.commit()
-    applied = {row[0] for row in conn.execute("SELECT version FROM schema_migrations")}
-    for version, sql in MIGRATIONS:
-        if version in applied:
-            continue
-        conn.executescript(
-            "BEGIN IMMEDIATE;\n"
-            + sql
-            + f"\nINSERT OR IGNORE INTO schema_migrations (version) VALUES ({version});\nCOMMIT;"
-        )
+    for version, step in MIGRATIONS:
+        conn.execute("BEGIN IMMEDIATE")
+        try:
+            if conn.execute(
+                "SELECT 1 FROM schema_migrations WHERE version = ?", (version,)
+            ).fetchone():
+                conn.rollback()
+                continue
+            if callable(step):
+                step(conn)
+            else:
+                for statement in _statements(step):
+                    conn.execute(statement)
+            conn.execute("INSERT INTO schema_migrations (version) VALUES (?)", (version,))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
 
 
 def init_app(app):
@@ -146,10 +219,14 @@ def init_app(app):
         conn = connect(database_path())
         try:
             migrate(conn)
-            # Seed bundled course files that aren't in the database yet.
-            # Existing courses are left untouched; updates are deliberate
-            # via `flask courses import --update`.
+            # Seed bundled course files that aren't in the database yet, and
+            # apply a bundled file whose data_version is newer than the copy
+            # in the database. Other changes are deliberate, via
+            # `flask courses import --update`.
             from app.courses import seed_bundled_courses
             seed_bundled_courses(conn)
+            # Bring back saved rounds after a redeploy wiped the local disk.
+            from app.backup import restore_if_empty
+            restore_if_empty(conn)
         finally:
             conn.close()

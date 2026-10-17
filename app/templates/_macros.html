@@ -1,0 +1,60 @@
+{% macro fmt_par(n) -%}
+  {%- if n is none -%}—{%- elif n > 0 -%}+{{ n }}{%- elif n < 0 -%}{{ n }}{%- else -%}E{%- endif -%}
+{%- endmacro %}
+
+{% macro tee_label(name, color=None) -%}
+  {%- if color %}<span class="tee-dot tee-{{ color }}" aria-hidden="true"></span>{% endif -%}{{ name }}
+{%- endmacro %}
+
+{% macro field_error(errors, key) -%}
+  {%- if errors and errors.get(key) %}<p class="field-error" id="{{ key }}-error">{{ errors[key] }}</p>{% endif -%}
+{%- endmacro %}
+
+{# Course / tee summary for a round. Unconfirmed course data is labeled. #}
+{% macro course_header(info, player=None, date=None) %}
+<p class="muted small" style="margin:0">
+  {% if player %}<strong>{{ player }}</strong> · {% endif %}{% if date %}{{ date }} · {% endif %}
+  {{ info.name }}{% if info.tee_name %} · {{ info.tee_name }} tees{% endif %}
+  {% if info.total_yardage %} · {{ '{:,}'.format(info.total_yardage) }} yds{% endif %}
+  · Par {{ info.total_par }}
+  {% if info.course_rating and info.slope_rating %} · {{ info.course_rating }}/{{ info.slope_rating }}{% endif %}
+</p>
+{% if info.par_status != 'verified' or (info.tee_name and info.tee_status != 'verified') %}
+<p class="note">
+  {% if info.par_status != 'verified' %}Hole pars {{ 'were entered manually' if info.par_status == 'user_entered' else 'are unverified' }} and haven't been checked against the official scorecard.{% endif %}
+  {% if info.tee_name and info.tee_status != 'verified' %}Tee details are unverified.{% endif %}
+</p>
+{% endif %}
+{% endmacro %}
+
+{# Front/back nine scorecard tables. holes: list of {number, par, yardage};
+   scores: {hole_number: score}. #}
+{% macro scorecard(holes, scores, tee_name=None) %}
+{% set nines = [holes[:9], holes[9:]] if holes|length > 9 else [holes] %}
+{% for nine in nines if nine %}
+<div class="scorecard-wrap">
+<table class="scorecard">
+  <caption>{{ 'Front nine' if loop.first and nines|length > 1 else ('Back nine' if nines|length > 1 else 'Scorecard') }}</caption>
+  <thead>
+    <tr><th scope="col">Hole</th>{% for h in nine %}<th scope="col">{{ h.number }}</th>{% endfor %}<th scope="col" class="tot">{{ 'Out' if loop.first and nines|length > 1 else ('In' if nines|length > 1 else 'Tot') }}</th></tr>
+  </thead>
+  <tbody>
+    {% if nine|selectattr('yardage')|list|length == nine|length %}
+    <tr class="par"><th scope="row"><abbr title="{{ tee_name ~ ' tees, yards' if tee_name else 'Yards' }}">Yds</abbr></th>{% for h in nine %}<td>{{ h.yardage }}</td>{% endfor %}<td class="tot">{{ nine|sum(attribute='yardage') }}</td></tr>
+    {% endif %}
+    <tr class="par"><th scope="row">Par</th>{% for h in nine %}<td>{{ h.par }}</td>{% endfor %}<td class="tot">{{ nine|sum(attribute='par') }}</td></tr>
+    <tr class="score"><th scope="row">Score</th>
+      {% set ns = namespace(total=0, n=0) %}
+      {% for h in nine %}
+        {% set s = scores.get(h.number) %}
+        {% if s %}{% set ns.total = ns.total + s %}{% set ns.n = ns.n + 1 %}{% endif %}
+        <td>{% if s %}<span class="sc {{ 'under' if s < h.par else ('over2' if s >= h.par + 2 else ('over' if s > h.par else '')) }}"
+              aria-label="{{ s }}{% if s < h.par %}, under par{% elif s > h.par %}, over par{% endif %}">{{ s }}</span>{% else %}<span class="muted" aria-label="not played">–</span>{% endif %}</td>
+      {% endfor %}
+      <td class="tot">{{ ns.total if ns.n else '–' }}</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+{% endfor %}
+{% endmacro %}

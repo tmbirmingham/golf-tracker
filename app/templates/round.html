@@ -1,30 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your round — Golf Tracker</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-  <h1>Round in Progress</h1>
-  {% include "_course_header.html" %}
+{% extends "base.html" %}
+{% from "_macros.html" import course_header, fmt_par %}
+{% block title %}Your round{% endblock %}
+{% block content %}
+<h1>Your round</h1>
+{{ course_header(course_info, player_name) }}
 
-  <p class="hint">Tap a hole to enter or edit its score and stats.</p>
+<div class="tiles">
+  <div class="tile"><p class="value">{{ holes_played_count }}/{{ course_info.hole_count }}</p><p class="label">Holes entered</p></div>
+  <div class="tile"><p class="value">{{ running_total if holes_played_count else '–' }}</p><p class="label">Strokes</p></div>
+  <div class="tile"><p class="value">{{ fmt_par(running_to_par) if holes_played_count else '–' }}</p><p class="label">To par (holes played)</p></div>
+</div>
 
-  <div class="scorecard">
-    {% for hole_num, score, par, yardage in scorecard %}
-    <a href="{{ url_for('main.hole', hole=hole_num) }}" class="{% if score is not none %}filled{% endif %}">
-      <span class="hole">Hole {{ hole_num }} (Par {{ par }}){% if yardage %}<br>{{ yardage }} yds{% endif %}</span>
-      <span class="score">{% if score is not none %}{{ score }}{% else %}—{% endif %}</span>
-    </a>
-    {% endfor %}
-  </div>
+<p class="muted small">Tap a hole to enter or change its score.</p>
+<nav class="hole-grid" aria-label="Holes">
+  {% for hole_num, score, par, yardage in scorecard %}
+  <a href="{{ url_for('main.hole', hole=hole_num) }}" class="{% if score is not none %}filled{% endif %}"
+     aria-label="Hole {{ hole_num }}, par {{ par }}{% if yardage %}, {{ yardage }} yards{% endif %}{% if score is not none %}, scored {{ score }}{% else %}, not entered{% endif %}">
+    <span><span class="h">{{ hole_num }}</span> <span class="meta">Par {{ par }}{% if yardage %} · {{ yardage }}{% endif %}</span></span>
+    <span class="score">{% if score is not none %}{{ score }}{% else %}<span class="muted">–</span>{% endif %}</span>
+  </a>
+  {% endfor %}
+</nav>
 
-  {% if holes_played_count > 0 %}
-  <a href="{{ url_for('main.finish') }}" class="end-round">End round ({{ holes_played_count }} hole{{ 's' if holes_played_count != 1 else '' }})</a>
-  {% else %}
-  <span class="end-round disabled">End round — enter at least one hole</span>
-  {% endif %}
-</body>
-</html>
+{% if holes_played_count > 0 %}
+<a href="{{ url_for('main.finish') }}" class="btn block large">Review and save round</a>
+{% else %}
+<p class="muted">Enter at least one hole to save the round.</p>
+{% endif %}
+{% endblock %}
